@@ -4,6 +4,14 @@
   <artifactId>chimera-koronos-java</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <name>Chimera II Koronos Java 25</name>
+  <description>Chimera II OS Java/Koronos research runtime and cross-platform compatibility layer.</description>
+  <licenses>
+    <license>
+      <name>GNU General Public License v3.0 or later</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <properties>
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

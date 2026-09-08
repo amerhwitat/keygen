@@ -33,9 +33,9 @@ The capability detector uses `XDG_SESSION_TYPE`, `WAYLAND_DISPLAY`, `DISPLAY`, D
 
 ## Freedesktop
 
-The runtime provides a small Java model/codec for common `.desktop` fields and an XDG environment model. It follows the freedesktop desktop-entry approach so GNOME/KDE and other environments can interoperate through the same launcher metadata. See the official Desktop Entry Specification for the normative format. citeturn0search0
+The runtime provides a small Java model/codec for common `.desktop` fields and an XDG environment model. It follows the freedesktop desktop-entry model used by interoperable Linux desktop environments. The normative specification is the freedesktop Desktop Entry Specification 1.5.
 
-Autostart remains a freedesktop/native-session concern; the Java runtime can model its metadata but does not replace the desktop's native startup manager. citeturn0search5
+Autostart remains a freedesktop/native-session concern; the Java runtime can model its metadata but does not replace the desktop's native startup manager.
 
 ## Aurora
 

@@ -1,15 +1,26 @@
 package org.chimera.desktop;
 
+import java.util.List;
 import java.util.Objects;
 
 /** Coordinates the shared Spitfire boot progress with the graphical desktop loading pass. */
 public final class BootDesktopProgressCoordinator {
+    private static final List<String> STANDARD_BOOT_STAGES = List.of(
+            "firmware / platform discovery",
+            "memory and register initialization",
+            "ISA/runtime initialization",
+            "security and trust initialization",
+            "storage/filesystem discovery",
+            "Koronos kernel initialization",
+            "network/runtime services",
+            "desktop session preparation");
+
     private final SpitfireBootProgress bootProgress;
     private final DesktopLoadingProgress desktopProgress;
     private boolean desktopLoadingStarted;
 
     public BootDesktopProgressCoordinator() {
-        this(new SpitfireBootProgress(), new DesktopLoadingProgress());
+        this(new SpitfireBootProgress(STANDARD_BOOT_STAGES), new DesktopLoadingProgress());
     }
 
     public BootDesktopProgressCoordinator(SpitfireBootProgress bootProgress,

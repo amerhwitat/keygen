@@ -31,7 +31,8 @@ class DesktopRuntimeTest {
     @Test
     void unavailableProfileCannotBeSelected() {
         var detector = new DesktopCapabilityDetector((environment, executable) -> false);
-        var menu = new DesktopStartupMenu(DesktopProfileRegistry.defaults(), detector.detect(Map.of()), detector::available);
+        var menu = new DesktopStartupMenu(DesktopProfileRegistry.defaults(), detector.detect(Map.of()),
+                candidate -> detector.launcherAvailable(candidate, Map.of()));
         assertThrows(DesktopSelectionException.class, () -> menu.select("fedora-gnome"));
     }
 

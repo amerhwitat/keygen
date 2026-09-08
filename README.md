@@ -1,198 +1,109 @@
 # Chimera II OS — Java 25 / Koronos 128D
 
-This repository is the **isolated Java implementation track** for Chimera II OS. It provides a semantic JVM model of the Chimera processor/kernel concepts, the Koronos 128D research runtime, a persistent self-learning kernel layer, and a Linux desktop/session orchestration layer.
+This repository is the **isolated Java implementation track** for Chimera II OS. It provides a semantic JVM model of Chimera processor/kernel concepts, the Koronos 128D research runtime, persistent self-learning, Linux desktop orchestration, Linux runtime/service integration, high concurrency and trusted-node federation.
 
-> **Scope boundary:** this repository does not modify `amerhwitat/ChimeraIIOS` or `amerhwitat/test`. Native Chimera remains the source-of-record for hardware, boot, ABI, driver, compositor, and platform-specific behavior.
+> **Scope boundary:** this repository does not modify `amerhwitat/ChimeraIIOS` or `amerhwitat/test`. Native Chimera remains the source-of-record for hardware, boot, ABI, driver, compositor and platform-specific behavior.
 
 ## Project status
 
-- Java 25 / Maven baseline.
-- Jakarta EE 11 integration.
+- Java 25 / Maven baseline and Jakarta EE 11.
 - 8192-bit register model represented as 128 × 64-bit lanes.
 - Canonical 16-byte Chimera instruction representation.
-- Core R8192 ALU semantic model.
-- 128D vector/state representation.
-- Deterministic Koronos recurrent-learning research prototype.
-- **Persistent self-learning Koronos kernel.**
-- **Embedded H2 kernel database at `/var/Cimera/Data/kernel.mv.db` by default.**
-- Knowledge/evidence bus and REST service boundary.
-- Linux desktop startup/session model for Aurora, Fedora, Ubuntu, Debian and common desktop environments.
-- Freedesktop/XDG metadata model.
-- Launcher-aware availability probing and safe startup fallback.
-- Explicit native-source migration/provenance manifest.
+- Deterministic Koronos 128D research runtime.
+- Persistent self-learning kernel using H2 at `/var/Cimera/Data/kernel.mv.db` by default.
+- High-concurrency runtime: virtual threads, bounded CPU worker pool and isolated native processes.
+- Explicit Ed25519 trust identities and signed inter-node messages.
+- Linux runtime catalog for Python, OpenJDK, Firefox, Chrome, Bash, Zsh, PowerShell, .NET, NGINX, BIND 9 and Postfix.
+- Kali security-tool/metapackage catalog including Burp Suite and Metasploit for authorized security testing.
+- Aurora/Fedora/Ubuntu/Debian and common Linux desktop startup orchestration.
 - CI verification with JDK 25 and Maven tests.
 
 ## Architecture
 
 ```text
-Native Chimera source-of-record
-            │
-            │ semantic migration / conformance
-            ▼
-┌─────────────────────────────────────────────┐
-│              Java 25 Runtime                │
-├─────────────────────────────────────────────┤
-│ Chimera CPU / ISA │ Kernel / services       │
-│ 8192-bit register │ Jakarta EE REST         │
-│ 16-byte instruction│ Virtual-thread runtime │
-├─────────────────────────────────────────────┤
-│          Koronos 128D cognition             │
-│ vector state → recurrent state → evidence   │
-│ bounded adaptation → persisted model        │
-├─────────────────────────────────────────────┤
-│       Persistent Self-Learning Kernel        │
-│ observations → adaptation → loss → snapshot │
-│                 ↓                           │
-│       H2 → /var/Cimera/Data/kernel.mv.db    │
-├─────────────────────────────────────────────┤
-│          Linux Desktop Runtime              │
-│ profiles → capability probe → launcher      │
-│ validation → structured launch plan         │
-│ Aurora / Wayland / X11 / recovery           │
-└─────────────────────────────────────────────┘
-            │
-            ▼
- Native Linux compositor / session / driver
+                 Chimera native source-of-record
+                              │
+                    semantic/conformance boundary
+                              ▼
+┌────────────────────────────────────────────────────────────┐
+│                       Koronos Kernel                       │
+├──────────────────┬──────────────────┬─────────────────────┤
+│ 8192-bit CPU/ISA │ self-learning    │ high concurrency    │
+│ semantic model   │ 128D + H2 DB     │ threads/processes   │
+├──────────────────┴──────────────────┴─────────────────────┤
+│ Linux Runtime / Services / Desktop / Security Tool Catalog │
+│ Python • Java • Firefox • Chrome • Bash • Zsh • pwsh       │
+│ .NET • NGINX • BIND • Postfix • Kali profiles              │
+├────────────────────────────────────────────────────────────┤
+│ Trusted Chimera Federation                                 │
+│ Ed25519 identities → explicit trust → signed messages      │
+└────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+                Native Linux services / compositor
 ```
 
-The Java layer deliberately models native boundaries rather than pretending that a JVM can execute x86 boot code, replace a kernel, or reimplement every desktop compositor.
+## Persistent self-learning
 
-## Self-learning kernel and internal database
+`KoronosKernel.observe()` performs a bounded self-supervised update and persists observations, learning events and complete 128D model snapshots. A fresh kernel restores the latest valid snapshot. Learning cannot rewrite kernel code, ISA/ABI definitions, privilege policy, executable paths or native binaries.
 
-`KoronosKernel` now learns continuously from its telemetry observation path. Each observation is processed through the 128D recurrent model and a bounded self-supervised update, then persisted together with its learning loss and complete recurrent model snapshot.
+## Highly multithreaded and multiprocess Koronos
 
-Default storage:
+`KoronosConcurrency` provides:
 
-```text
-/var/Cimera/Data/
-└── kernel.mv.db
-```
+- virtual threads for high fan-out I/O;
+- bounded platform workers for CPU-oriented tasks;
+- structured `ProcessBuilder(List<String>)` process isolation for external runtimes/services;
+- no shell-command concatenation in the process boundary.
 
-The persisted database contains:
+The kernel exposes these through `submitIo`, `submitCpu` and `startProcess` while retaining the existing CPU and learning APIs.
 
-- telemetry observations;
-- learning events and loss values;
-- complete recurrent model snapshots containing weights, bias and hidden state.
+## Trusted Chimera nodes
 
-A fresh `KoronosKernel` instance loads the latest model snapshot, so learned state survives process restart. Tests inject temporary database directories and never depend on the production `/var` path.
+Nodes do not trust one another merely because they can reach the network. Each node has an Ed25519 identity; the receiving node explicitly registers the sender public key. Inter-node application messages are signed and bound to message metadata plus a SHA-256 payload digest. Stale, untrusted or tampered messages are rejected.
 
-The learning mechanism is intentionally bounded: it cannot rewrite kernel code, the ISA/ABI, privilege policy, executable paths or native binaries. It is a research adaptive-kernel mechanism and is not represented as AGI, consciousness or autonomous superintelligence.
+The current trust policy is in-memory; durable trust records are designed to fit the existing kernel database boundary before production federation deployment.
+
+## Linux runtime/service stack
+
+The Java layer uses a **runtime catalog**, not a vendor dump of third-party binaries. This is important for licensing, signatures, security updates and native dependencies. Current catalog targets include Python 3.14.7, OpenJDK 26.0.2.1, Zsh 5.9.2, PowerShell 7.6.2, .NET 10.0.400, NGINX 1.30.4 stable, BIND 9.20.27 and Postfix 3.11.7; Firefox and Chrome track current stable packages rather than pinning stale browser builds.
+
+For Kali, the catalog exposes native metapackages and a top-tool profile rather than embedding an entire Kali filesystem. It includes Nmap, Burp Suite, Metasploit Framework, Wireshark, Aircrack-ng, Hydra, John, NetExec, Responder and sqlmap. Use these only on systems and targets for which authorization exists.
+
+See `docs/LINUX_RUNTIME_STACK.md` for the complete model.
 
 ## Linux desktop and Aurora
 
-The `org.chimera.desktop` package provides a data-driven startup menu covering:
+The desktop registry covers Aurora/Wayland, Fedora GNOME, Ubuntu GNOME, Debian GNOME, KDE Plasma, Xfce, Cinnamon, MATE, LXQt, GNOME Flashback, Safe/Minimal and Headless/Server. Availability is detected on the host; the Java layer does not replace native compositors or package managers.
 
-- **Chimera Aurora / Wayland**
-- **Fedora GNOME**
-- **Ubuntu GNOME**
-- **Debian GNOME**
-- **KDE Plasma** (Wayland/X11 candidates)
-- **Xfce**
-- **Cinnamon**
-- **MATE**
-- **LXQt**
-- **GNOME Flashback**
-- **Safe / Minimal** recovery
-- **Headless / Server** recovery
+## CPU / ISA and 128D
 
-The registry is distribution-aware but does not bundle Fedora, Debian, Ubuntu, Aurora, GNOME, KDE or other desktop packages. A profile describes what the runtime knows how to launch; **availability is determined at runtime**.
+The Java CPU model preserves the documented 8192-bit/128×64-bit semantic representation and canonical 16-byte instruction packet. The native ISA remains authoritative; complete native ISA parity is not claimed until generated conformance vectors cover the authoritative opcode/bitfield set.
 
-Startup selection is fail-safe:
-
-1. prefer the configured Aurora/default profile when its session capabilities and launcher are available;
-2. otherwise select Safe / Minimal;
-3. otherwise select Headless / Server.
-
-Launcher candidates are validated without invoking a shell. Actual execution is delegated through a structured `ProcessBuilder` boundary or an application-supplied native adapter.
-
-### Desktop API
-
-Jakarta REST exposes:
-
-- `GET /api/desktop/profiles` — profile inventory and availability metadata.
-- `GET /api/desktop/current` — current/default desktop selection state.
-- `GET /api/desktop/select/{id}` — validates a profile and returns a structured launch plan; it **does not execute** the process.
-
-The API is intentionally separated from process execution so a graphical, TUI, web, display-manager or native Aurora frontend can render the same startup menu.
-
-## Freedesktop/XDG integration
-
-The Java desktop layer models common freedesktop concepts needed for interoperable desktop integration:
-
-- desktop-entry fields;
-- application categories;
-- `OnlyShowIn` / `NotShowIn` constraints;
-- D-Bus activation metadata;
-- XDG data/config/cache/runtime locations;
-- current desktop/session type;
-- Wayland/X11/D-Bus/portal/audio/GPU capability observations.
-
-It does not replace the native desktop's session manager, display manager, portal implementation or compositor.
-
-## Chimera CPU / ISA
-
-The Java processor model follows the documented semantic representation:
-
-- 8192-bit general-purpose register model;
-- 128 lanes × 64 bits per register;
-- 16-byte canonical instruction packet;
-- opcode and register fields represented explicitly;
-- arithmetic, logical, shifts/rotates, multiply, move, divide/remainder and comparison semantics implemented in the current Java subset;
-- privilege-sensitive operations represented by explicit Java policy/service boundaries.
-
-The complete native ISA remains the authoritative source. Where a mechanical translation would change ABI or hardware semantics, the Java implementation uses a semantic model and records the mapping in `docs/SOURCE_MIGRATION_MANIFEST.md`.
-
-## Koronos 128D
-
-Koronos is a bounded research runtime around a 128-dimensional state representation. The current recurrent implementation is deterministic under a supplied seed and supports bounded self-supervised adaptation, model snapshot and restore.
-
-The 128D representation is an architectural abstraction, not a claim that physical reality has exactly 128 fundamental dimensions. The project also makes no claim of AGI or autonomous superintelligence.
+Koronos 128D is a bounded research architecture, not a claim of AGI, consciousness or autonomous superintelligence.
 
 ## Build and test
 
-Requirements:
-
-- JDK 25
-- Maven 3.9+ recommended
+Requirements: JDK 25 and Maven 3.9+.
 
 ```bash
 mvn test
 mvn package
 ```
 
-CI uses JDK 25 and verifies the Maven project without launching a real desktop compositor.
-
-## Running in a Linux host
-
-The Java runtime can be embedded in a native Linux launcher, service, application server or future Aurora shell. A normal desktop deployment should provide the desired compositor/session packages through the host distribution.
-
-For example, the host may provide `gnome-session`, `startplasma-wayland`, `startplasma-x11`, `startxfce4`, `cinnamon-session`, `mate-session`, or `startlxqt`. The registry treats these as candidates and checks what is actually installed before presenting a profile as selectable.
-
-For production persistence, the service account must have access to `/var/Cimera/Data`; the Java runtime creates the directory when it is missing and permissions allow it. A dedicated non-root service account is recommended.
-
-The Java process itself is not a replacement for the Linux display manager or compositor.
+JDK 25 remains the build baseline for compatibility while OpenJDK 26 is cataloged as the current Java feature release.
 
 ## Documentation map
 
-- [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) — documentation map and maintenance rules.
-- [`docs/JAVA_RUNTIME_ARCHITECTURE.md`](docs/JAVA_RUNTIME_ARCHITECTURE.md) — CPU, kernel, 128D, persistence and desktop architecture.
-- [`docs/KERNEL_LEARNING_DATABASE.md`](docs/KERNEL_LEARNING_DATABASE.md) — self-learning kernel and H2 persistence reference.
-- [`docs/LINUX_DESKTOP_AURORA.md`](docs/LINUX_DESKTOP_AURORA.md) — desktop architecture, profiles, startup, recovery and XDG integration.
-- [`docs/DESKTOP_API.md`](docs/DESKTOP_API.md) — Jakarta REST and launch-plan contract.
-- [`docs/SOURCE_MIGRATION_MANIFEST.md`](docs/SOURCE_MIGRATION_MANIFEST.md) — native-to-Java provenance and portability boundaries.
-- [`docs/superpowers/specs/2026-09-09-linux-desktop-aurora-design.md`](docs/superpowers/specs/2026-09-09-linux-desktop-aurora-design.md) — approved desktop integration design.
+- `docs/DOCUMENTATION_INDEX.md` — documentation map.
+- `docs/JAVA_RUNTIME_ARCHITECTURE.md` — complete Java architecture.
+- `docs/KERNEL_LEARNING_DATABASE.md` — self-learning and persistence.
+- `docs/LINUX_RUNTIME_STACK.md` — Linux runtimes, services and Kali integration.
+- `docs/KORONOS_DISTRIBUTED_RUNTIME.md` — concurrency, processes and trusted nodes.
+- `docs/LINUX_DESKTOP_AURORA.md` — desktop/session integration.
+- `docs/DESKTOP_API.md` — Jakarta REST contract.
+- `docs/SOURCE_MIGRATION_MANIFEST.md` — native-to-Java provenance.
 
-## Compatibility and non-goals
+## Non-goals
 
-This project is additive and preserves the existing Java ABI/API wherever possible. It does not:
-
-- replace the Linux kernel;
-- replace systemd or a display manager;
-- reimplement GNOME, KDE Plasma, Xfce, Cinnamon, MATE or LXQt in Java;
-- execute native x86 boot sectors inside the JVM;
-- emulate real hardware MMIO/DMA/GPU behavior unless an explicit simulator/adapter exists;
-- silently claim complete parity with the native Chimera implementation;
-- bundle an entire Linux distribution or root filesystem;
-- allow the learning model to modify kernel code, ABI, privilege policy or native binaries.
-
-For native behavior, use the native Chimera repository and the documented Java adapter boundaries.
+This repository does not replace the Linux kernel, systemd, display managers, native desktop compositors, third-party browsers/services, or native Chimera hardware. It provides a coherent orchestration and semantic runtime layer around those components while preserving the existing Java ABI/API intent.

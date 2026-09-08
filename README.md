@@ -1,6 +1,6 @@
 # Chimera II OS — Java 25 / Koronos 128D
 
-This repository is the **isolated Java implementation track** for Chimera II OS. It provides a semantic JVM model of Chimera processor/kernel concepts, the Koronos 128D research runtime, persistent self-learning, Linux desktop orchestration, Linux runtime/service integration, high concurrency and trusted-node federation.
+This repository is the isolated Java implementation track for Chimera II OS. It provides a semantic JVM model of Chimera processor/kernel concepts, the Koronos 128D research runtime, persistent self-learning, Linux desktop orchestration, Linux runtime/service integration, high concurrency, trusted-node federation and cross-platform interoperability.
 
 > **Scope boundary:** this repository does not modify `amerhwitat/ChimeraIIOS` or `amerhwitat/test`. Native Chimera remains the source-of-record for hardware, boot, ABI, driver, compositor and platform-specific behavior.
 
@@ -14,9 +14,33 @@ This repository is the **isolated Java implementation track** for Chimera II OS.
 - High-concurrency runtime: virtual threads, bounded CPU worker pool and isolated native processes.
 - Explicit Ed25519 trust identities and signed inter-node messages.
 - Linux runtime catalog for Python, OpenJDK, Firefox, Chrome, Bash, Zsh, PowerShell, .NET, NGINX, BIND 9 and Postfix.
-- Kali security-tool/metapackage catalog including Burp Suite and Metasploit for authorized security testing.
+- Kali security-tool/metapackage catalog including Nmap, Burp Suite and Metasploit for authorized security testing.
+- IPv4/IPv6 network scanner inventory including Nmap, Masscan, ZMap, RustScan, Naabu and common discovery utilities.
+- Windows 16/32/64-bit compatibility profiles, PE32/PE32+ boundaries and native/Wine execution planning.
+- Windows/Linux/Unix/BSD/macOS filesystem interoperability inventory.
+- SMB2/SMB3, NFS/NFSv4, Samba, Active Directory/LDAP/Kerberos, mDNS/Bonjour and SMB network-browser integration boundaries.
+- macOS Tahoe 26 / Finder integration descriptors.
 - Aurora/Fedora/Ubuntu/Debian and common Linux desktop startup orchestration.
 - CI verification with JDK 25 and Maven tests.
+
+## Cross-platform compatibility
+
+`org.chimera.compat` contains the compatibility layer:
+
+- `NetworkScannerCatalog` — IPv4/IPv6 scanner inventory.
+- `FileSystemCatalog` — Windows, Linux, Unix/BSD and Apple filesystem families.
+- `WindowsCompatibilityCatalog` — Win16, Win32, Win64/PE32+, Windows Server and ARM64 profiles.
+- `NetworkInteroperabilityCatalog` — Samba daemons, SMB browser/client, NFS, LDAP, Kerberos and mDNS roles.
+- `MacNetworkCatalog` — macOS Tahoe 26, Finder, SMB, NFS, Bonjour and directory-service integration.
+- `W2kAsmCompatibilityManifest` — provenance and architectural compatibility metadata for the Library `W2K-ASM.txt` corpus.
+
+The supplied `W2K-ASM.txt` is 921,435 lines and contains historical x86, Alpha, PowerPC, Win16/Win32 thunking and emulator/8087 material. It carries Microsoft Confidential/proprietary notices, so the complete corpus is **not redistributed into this public repository**. The Library copy remains the reference source while its compatibility targets are represented by the manifest and Windows compatibility layer.
+
+## Linux and network interoperability
+
+The Java layer catalogs native runtimes and services rather than vendoring third-party operating systems or binaries. Native package managers remain responsible for signatures and updates. Samba remains the native SMB/AD implementation; NFS remains a native filesystem protocol; Finder remains Apple's native desktop shell.
+
+Nmap supports both IPv4 and IPv6, including IPv6 operation with `-6`. All scanning functionality is intended for authorized networks and hosts.
 
 ## Architecture
 
@@ -31,16 +55,15 @@ This repository is the **isolated Java implementation track** for Chimera II OS.
 │ 8192-bit CPU/ISA │ self-learning    │ high concurrency    │
 │ semantic model   │ 128D + H2 DB     │ threads/processes   │
 ├──────────────────┴──────────────────┴─────────────────────┤
-│ Linux Runtime / Services / Desktop / Security Tool Catalog │
-│ Python • Java • Firefox • Chrome • Bash • Zsh • pwsh       │
-│ .NET • NGINX • BIND • Postfix • Kali profiles              │
+│ Compatibility / Runtime / Network / Desktop Integration   │
+│ Windows • Linux • Unix • macOS • SMB • NFS • AD • Finder  │
 ├────────────────────────────────────────────────────────────┤
 │ Trusted Chimera Federation                                 │
 │ Ed25519 identities → explicit trust → signed messages      │
 └────────────────────────────────────────────────────────────┘
                               │
                               ▼
-                Native Linux services / compositor
+                Native operating-system services
 ```
 
 ## Persistent self-learning
@@ -49,28 +72,17 @@ This repository is the **isolated Java implementation track** for Chimera II OS.
 
 ## Highly multithreaded and multiprocess Koronos
 
-`KoronosConcurrency` provides:
-
-- virtual threads for high fan-out I/O;
-- bounded platform workers for CPU-oriented tasks;
-- structured `ProcessBuilder(List<String>)` process isolation for external runtimes/services;
-- no shell-command concatenation in the process boundary.
-
-The kernel exposes these through `submitIo`, `submitCpu` and `startProcess` while retaining the existing CPU and learning APIs.
+`KoronosConcurrency` provides virtual threads for high fan-out I/O, bounded platform workers for CPU-oriented tasks and structured `ProcessBuilder(List<String>)` process isolation for external runtimes/services. The process boundary does not concatenate shell command strings.
 
 ## Trusted Chimera nodes
 
 Nodes do not trust one another merely because they can reach the network. Each node has an Ed25519 identity; the receiving node explicitly registers the sender public key. Inter-node application messages are signed and bound to message metadata plus a SHA-256 payload digest. Stale, untrusted or tampered messages are rejected.
 
-The current trust policy is in-memory; durable trust records are designed to fit the existing kernel database boundary before production federation deployment.
-
 ## Linux runtime/service stack
 
-The Java layer uses a **runtime catalog**, not a vendor dump of third-party binaries. This is important for licensing, signatures, security updates and native dependencies. Current catalog targets include Python 3.14.7, OpenJDK 26.0.2.1, Zsh 5.9.2, PowerShell 7.6.2, .NET 10.0.400, NGINX 1.30.4 stable, BIND 9.20.27 and Postfix 3.11.7; Firefox and Chrome track current stable packages rather than pinning stale browser builds.
+The Java layer uses a runtime catalog, not a vendor dump of third-party binaries. Current catalog targets include Python 3.14.7, OpenJDK 26.0.2.1, Zsh 5.9.2, PowerShell 7.6.2, .NET 10.0.400, NGINX 1.30.4 stable, BIND 9.20.27 and Postfix 3.11.7; Firefox and Chrome track current stable packages rather than pinning stale browser builds.
 
-For Kali, the catalog exposes native metapackages and a top-tool profile rather than embedding an entire Kali filesystem. It includes Nmap, Burp Suite, Metasploit Framework, Wireshark, Aircrack-ng, Hydra, John, NetExec, Responder and sqlmap. Use these only on systems and targets for which authorization exists.
-
-See `docs/LINUX_RUNTIME_STACK.md` for the complete model.
+For Kali, the catalog exposes native metapackages and a top-tool profile rather than embedding an entire Kali filesystem.
 
 ## Linux desktop and Aurora
 
@@ -91,19 +103,4 @@ mvn test
 mvn package
 ```
 
-JDK 25 remains the build baseline for compatibility while OpenJDK 26 is cataloged as the current Java feature release.
-
-## Documentation map
-
-- `docs/DOCUMENTATION_INDEX.md` — documentation map.
-- `docs/JAVA_RUNTIME_ARCHITECTURE.md` — complete Java architecture.
-- `docs/KERNEL_LEARNING_DATABASE.md` — self-learning and persistence.
-- `docs/LINUX_RUNTIME_STACK.md` — Linux runtimes, services and Kali integration.
-- `docs/KORONOS_DISTRIBUTED_RUNTIME.md` — concurrency, processes and trusted nodes.
-- `docs/LINUX_DESKTOP_AURORA.md` — desktop/session integration.
-- `docs/DESKTOP_API.md` — Jakarta REST contract.
-- `docs/SOURCE_MIGRATION_MANIFEST.md` — native-to-Java provenance.
-
-## Non-goals
-
-This repository does not replace the Linux kernel, systemd, display managers, native desktop compositors, third-party browsers/services, or native Chimera hardware. It provides a coherent orchestration and semantic runtime layer around those components while preserving the existing Java ABI/API intent.
+See `docs/CROSS_PLATFORM_COMPATIBILITY.md` for the complete interoperability model and `docs/DOCUMENTATION_INDEX.md` for the documentation map.

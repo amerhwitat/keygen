@@ -1,7 +1,5 @@
 package org.chimera.cognition;
 
-import org.chimera.koronos.H2KernelDataStore;
-
 import java.util.SplittableRandom;
 
 /**
@@ -41,12 +39,12 @@ public final class KoronosRnn128 {
         for(int i=0;i<128;i++)for(int j=0;j<128;j++)values[k++]=wxh[i][j];
         for(double v:bias)values[k++]=v;
         for(double v:hidden.copy())values[k++]=v;
-        return H2KernelDataStore.pack(values);
+        return ModelSnapshotCodec.pack(values);
     }
 
     /** Restore a previously persisted model snapshot after validating its exact shape. */
     public void restore(byte[] snapshot){
-        double[] values=H2KernelDataStore.unpack(snapshot);
+        double[] values=ModelSnapshotCodec.unpack(snapshot);
         if(values.length!=MODEL_VALUES) throw new IllegalArgumentException("Unsupported Koronos RNN snapshot size");
         int k=0;
         for(int i=0;i<128;i++)for(int j=0;j<128;j++)whh[i][j]=values[k++];

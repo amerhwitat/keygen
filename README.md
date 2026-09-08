@@ -14,6 +14,9 @@ This repository is the isolated Java implementation track for Chimera II OS. It 
 - High-concurrency runtime: virtual threads, bounded CPU worker pool and isolated native processes.
 - Explicit Ed25519 trust identities and signed inter-node messages.
 - Linux runtime catalog for Python, OpenJDK, Firefox, Chrome, Bash, Zsh, PowerShell, .NET, NGINX, BIND 9 and Postfix.
+- GNU/open-source utility and service catalog covering Coreutils, Findutils, Grep, Sed, Gawk, Diffutils, Patch, Tar, compression tools, Make, Binutils, GCC, GDB, Autotools, Bash, Screen, Wget, Inetutils and GnuTLS.
+- GNU network-service profiles for syslogd, ftpd, telnetd, rshd/rexecd, talkd and GnuTLS endpoints where supported by the host platform.
+- Windows GNU delivery profiles for MSYS2, Cygwin, WSL2 and maintained native ports.
 - Kali security-tool/metapackage catalog including Nmap, Burp Suite and Metasploit for authorized security testing.
 - IPv4/IPv6 network scanner inventory including Nmap, Masscan, ZMap, RustScan, Naabu and common discovery utilities.
 - Windows 16/32/64-bit compatibility profiles, PE32/PE32+ boundaries and native/Wine execution planning.
@@ -21,12 +24,14 @@ This repository is the isolated Java implementation track for Chimera II OS. It 
 - SMB2/SMB3, NFS/NFSv4, Samba, Active Directory/LDAP/Kerberos, mDNS/Bonjour and SMB network-browser integration boundaries.
 - macOS Tahoe 26 / Finder integration descriptors.
 - Aurora/Fedora/Ubuntu/Debian and common Linux desktop startup orchestration.
+- Repository license: GNU GPLv3-or-later for original project source and documentation, with third-party licenses preserved.
 - CI verification with JDK 25 and Maven tests.
 
-## Cross-platform compatibility
+## GNU and cross-platform compatibility
 
 `org.chimera.compat` contains the compatibility layer:
 
+- `GnuPlatformCatalog` — GNU utilities, network services and Windows delivery providers.
 - `NetworkScannerCatalog` — IPv4/IPv6 scanner inventory.
 - `FileSystemCatalog` — Windows, Linux, Unix/BSD and Apple filesystem families.
 - `WindowsCompatibilityCatalog` — Win16, Win32, Win64/PE32+, Windows Server and ARM64 profiles.
@@ -36,9 +41,11 @@ This repository is the isolated Java implementation track for Chimera II OS. It 
 
 The supplied `W2K-ASM.txt` is 921,435 lines and contains historical x86, Alpha, PowerPC, Win16/Win32 thunking and emulator/8087 material. It carries Microsoft Confidential/proprietary notices, so the complete corpus is **not redistributed into this public repository**. The Library copy remains the reference source while its compatibility targets are represented by the manifest and Windows compatibility layer.
 
-## Linux and network interoperability
+## Linux, Windows and network interoperability
 
 The Java layer catalogs native runtimes and services rather than vendoring third-party operating systems or binaries. Native package managers remain responsible for signatures and updates. Samba remains the native SMB/AD implementation; NFS remains a native filesystem protocol; Finder remains Apple's native desktop shell.
+
+GNU services are represented as host integration targets. On Linux they map to the distribution's native packages and service manager. On Windows they can be supplied through MSYS2, Cygwin, WSL2 or a maintained native port; Linux daemons are not falsely represented as native Win32 services.
 
 Nmap supports both IPv4 and IPv6, including IPv6 operation with `-6`. All scanning functionality is intended for authorized networks and hosts.
 
@@ -56,7 +63,7 @@ Nmap supports both IPv4 and IPv6, including IPv6 operation with `-6`. All scanni
 │ semantic model   │ 128D + H2 DB     │ threads/processes   │
 ├──────────────────┴──────────────────┴─────────────────────┤
 │ Compatibility / Runtime / Network / Desktop Integration   │
-│ Windows • Linux • Unix • macOS • SMB • NFS • AD • Finder  │
+│ Windows • Linux • Unix • macOS • GNU • SMB • NFS • AD     │
 ├────────────────────────────────────────────────────────────┤
 │ Trusted Chimera Federation                                 │
 │ Ed25519 identities → explicit trust → signed messages      │
@@ -88,6 +95,10 @@ For Kali, the catalog exposes native metapackages and a top-tool profile rather 
 
 The desktop registry covers Aurora/Wayland, Fedora GNOME, Ubuntu GNOME, Debian GNOME, KDE Plasma, Xfce, Cinnamon, MATE, LXQt, GNOME Flashback, Safe/Minimal and Headless/Server. Availability is detected on the host; the Java layer does not replace native compositors or package managers.
 
+## Licensing
+
+Original Chimera II Java-track source and original documentation are licensed under **GNU GPLv3-or-later**. External dependencies, GNU packages, operating systems, Windows components, Apple components and native binaries keep their own licenses. See `LICENSE` and `docs/LICENSING.md`.
+
 ## CPU / ISA and 128D
 
 The Java CPU model preserves the documented 8192-bit/128×64-bit semantic representation and canonical 16-byte instruction packet. The native ISA remains authoritative; complete native ISA parity is not claimed until generated conformance vectors cover the authoritative opcode/bitfield set.
@@ -103,4 +114,4 @@ mvn test
 mvn package
 ```
 
-See `docs/CROSS_PLATFORM_COMPATIBILITY.md` for the complete interoperability model and `docs/DOCUMENTATION_INDEX.md` for the documentation map.
+See `docs/CROSS_PLATFORM_COMPATIBILITY.md`, `docs/GNU_CROSS_PLATFORM_SERVICES.md`, `docs/LICENSING.md` and `docs/DOCUMENTATION_INDEX.md` for detailed coverage.

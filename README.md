@@ -13,7 +13,38 @@ This repository is the **isolated Java implementation track** for Chimera II OS.
 - 128-dimensional state/tensor representation.
 - Recurrent learning prototype for the Koronos cognitive runtime.
 - REST/Jakarta EE boundary for kernel telemetry and inference.
+- Linux desktop runtime covering Fedora, Ubuntu, Debian and Aurora/Wayland profiles.
+- Freedesktop/XDG desktop-entry integration and structured startup launch plans.
+- Installed-launcher probing before a desktop profile is exposed as selectable.
+- Safe/minimal and headless recovery fallback when the preferred desktop cannot launch.
 - Explicit provenance/migration ledger for native source files.
+
+## Linux desktop runtime
+
+The additive `org.chimera.desktop` layer provides a data-driven startup menu for:
+
+- Chimera Aurora / Wayland
+- Fedora GNOME
+- Ubuntu GNOME
+- Debian GNOME
+- KDE Plasma
+- Xfce
+- Cinnamon
+- MATE
+- LXQt
+- GNOME Flashback
+- Safe / Minimal
+- Headless / Server
+
+Profile definition and host availability are separate. The runtime detects Wayland/X11/session capabilities and probes the executable candidates for each profile before marking the profile available. Multiple candidates are supported, so KDE Plasma can prefer Wayland and fall back to X11 when the corresponding launcher is installed.
+
+`DesktopSessionManager.defaultPlan()` prefers the Aurora default only when it is actually selectable, then falls back to Safe / Minimal and finally Headless / Server. This prevents the startup path from selecting a profile whose launcher is absent.
+
+Actual GNOME/KDE/Xfce/Cinnamon/MATE/LXQt sessions remain native Linux software; Java does not reimplement their compositors. The Java layer owns profile selection, capability/launcher validation, structured process plans, and integration metadata.
+
+Jakarta REST exposes `/api/desktop/profiles`, `/api/desktop/current`, and `/api/desktop/select/{id}`. The selection endpoint creates a launch plan and does not execute it.
+
+The desktop integration follows the freedesktop desktop-entry model used for interoperable application launch metadata.
 
 ## Important scope
 

@@ -1,6 +1,6 @@
 package org.chimera.cognition;
 
-import java.util.random.RandomGenerator;
+import java.util.SplittableRandom;
 
 /**
  * Compact trainable recurrent cell for Koronos research workloads.
@@ -14,7 +14,7 @@ public final class KoronosRnn128 {
     private final double learningRate;
 
     public KoronosRnn128(double learningRate,long seed){
-        this.learningRate=learningRate; RandomGenerator r=RandomGenerator.of("L64X128MixRandom"); r=r.split(seed);
+        this.learningRate=learningRate; SplittableRandom r=new SplittableRandom(seed);
         double scale=Math.sqrt(2.0/128.0);
         for(int i=0;i<128;i++)for(int j=0;j<128;j++){whh[i][j]=(r.nextDouble()-0.5)*scale;wxh[i][j]=(r.nextDouble()-0.5)*scale;}
     }

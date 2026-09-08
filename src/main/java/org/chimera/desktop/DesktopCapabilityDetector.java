@@ -1,16 +1,26 @@
 package org.chimera.desktop;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public final class DesktopCapabilityDetector {
     @FunctionalInterface public interface CommandProbe { boolean available(Map<String,String> environment, String executable); }
     private final CommandProbe probe;
-    public DesktopCapabilityDetector() { this((env, executable) -> {
-        var path = env.getOrDefault("PATH", System.getenv().getOrDefault("PATH", ""));
-        return Arrays.stream(path.split(java.io.File.pathSeparator)).filter(s -> !s.isBlank())
-                .map(java.nio.file.Path::of).map(p -> p.resolve(executable)).anyMatch(p -> java.nio.file.Files.isExecutable(p));
-    }); }
+
+    public DesktopCapabilityDetector() {
+        this((env, executable) -> {
+            var path = env.getOrDefault("PATH", System.getenv().getOrDefault("PATH", ""));
+            return Arrays.stream(path.split(java.io.File.pathSeparator))
+                    .filter(s -> !s.isBlank())
+                    .map(Path::of)
+                    .map(p -> p.resolve(executable))
+                    .anyMatch(Files::isExecutable);
+        });
+    }
+
     public DesktopCapabilityDetector(CommandProbe probe) { this.probe = Objects.requireNonNull(probe); }
+
     public Set<DesktopCapability> detect(Map<String,String> env) {
         var result = EnumSet.noneOf(DesktopCapability.class);
         if (env.containsKey("WAYLAND_DISPLAY") || "wayland".equalsIgnoreCase(env.get("XDG_SESSION_TYPE"))) result.add(DesktopCapability.WAYLAND);
@@ -21,5 +31,12 @@ public final class DesktopCapabilityDetector {
         if (probe.available(env, "pactl") || probe.available(env, "pipewire")) result.add(DesktopCapability.AUDIO);
         if (probe.available(env, "glxinfo") || probe.available(env, "vulkaninfo")) result.add(DesktopCapability.GPU);
         return Set.copyOf(result);
+    }
+
+    public boolean launcherAvailable(List<String> command, Map<String,String> env) {
+        if (command == null || command.isEmpty() || command.get(0).isBlank()) return false;
+        var executable = command.get(0);
+        if (executable.contains("/")) return Files.isExecutable(Path.of(executable));
+        return probe.available(env, executable);
     }
 }

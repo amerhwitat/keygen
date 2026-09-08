@@ -31,8 +31,18 @@ class DesktopRuntimeTest {
     @Test
     void unavailableProfileCannotBeSelected() {
         var detector = new DesktopCapabilityDetector((environment, executable) -> false);
-        var menu = new DesktopStartupMenu(DesktopProfileRegistry.defaults(), detector.detect(Map.of()));
+        var menu = new DesktopStartupMenu(DesktopProfileRegistry.defaults(), detector.detect(Map.of()), detector::available);
         assertThrows(DesktopSelectionException.class, () -> menu.select("fedora-gnome"));
+    }
+
+    @Test
+    void launcherAvailabilityControlsProfileSelection() {
+        var detector = new DesktopCapabilityDetector((environment, executable) -> true);
+        var capabilities = Set.of(DesktopCapability.WAYLAND, DesktopCapability.X11);
+        var menu = new DesktopStartupMenu(DesktopProfileRegistry.defaults(), capabilities,
+                candidate -> !candidate.isEmpty() && "definitely-installed".equals(candidate.get(0)));
+        assertThrows(DesktopSelectionException.class, () -> menu.select("fedora-gnome"));
+        assertDoesNotThrow(() -> menu.select("safe-minimal"));
     }
 
     @Test

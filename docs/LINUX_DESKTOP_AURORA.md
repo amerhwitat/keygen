@@ -19,11 +19,15 @@ The baseline registry includes:
 - Safe / Minimal
 - Headless / Server
 
-A profile can exist even when its launcher is not installed. Runtime availability is detected separately from the profile definition.
+A profile can exist even when its launcher is not installed. Runtime availability is detected separately from the profile definition. For normal desktop profiles, both session capability and at least one installed launcher candidate are required before the profile is selectable.
 
 ## Startup model
 
 `DesktopStartupMenu` produces deterministic entries. `DesktopSessionManager` converts a selected profile into a `DesktopLaunchPlan`. The plan contains an executable, an argument list and environment map, so the runtime does not concatenate untrusted shell strings.
+
+Launcher probing is injected through a predicate for deterministic tests. The production API wires it to `DesktopCapabilityDetector`, which checks executable names through `PATH` and direct executable paths without invoking a shell.
+
+`DesktopSessionManager.defaultPlan()` prefers the configured default profile only when that profile is available. If the default cannot launch, it tries Safe / Minimal and then Headless / Server, preventing a missing Aurora compositor from blocking startup.
 
 `ProcessDesktopAdapter` is the only supplied process-launch boundary. Applications embedding the runtime can replace it with a policy-controlled adapter or a test double.
 
@@ -39,7 +43,7 @@ Autostart remains a freedesktop/native-session concern; the Java runtime can mod
 
 ## Aurora
 
-Aurora is represented as a first-class Chimera flavor with a Wayland preference. This does not claim that the JVM implements the Aurora compositor. It provides the session-selection and integration boundary needed for a later native compositor or launcher.
+Aurora is represented as a first-class Chimera flavor with a Wayland preference. This does not claim that the JVM implements the Aurora compositor. It provides the session-selection and integration boundary needed for a native compositor or launcher.
 
 ## Enterprise API
 

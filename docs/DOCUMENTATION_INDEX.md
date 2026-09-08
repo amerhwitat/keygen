@@ -2,7 +2,7 @@
 
 **Last synchronized:** 2026-09-09
 
-This directory documents the Java 25 implementation track of Chimera II OS. Documentation is organized so that architecture, migration provenance, Linux desktop integration, persistent self-learning, Linux runtime integration, cross-platform interoperability and trusted-node federation can be understood independently.
+This directory documents the Java 25 implementation track of Chimera II OS. Documentation is organized so that architecture, migration provenance, Linux desktop integration, persistent self-learning, Linux runtime integration, GNU/open-source interoperability, licensing, cross-platform interoperability and trusted-node federation can be understood independently.
 
 ## Primary documents
 
@@ -14,11 +14,15 @@ This directory documents the Java 25 implementation track of Chimera II OS. Docu
 | `docs/LINUX_RUNTIME_STACK.md` | Python, Java, browsers, shells, PowerShell, .NET, HTTP, DNS, mail and Kali integration |
 | `docs/LINUX_RUNTIME_INSTALLATION.md` | Distro-aware package/service planning and installation security boundaries |
 | `docs/CROSS_PLATFORM_COMPATIBILITY.md` | IPv4/IPv6 scanners, Windows/Win32 compatibility, W2K-ASM provenance, filesystems, SMB, AD, NFS, Samba and macOS/Finder |
+| `docs/GNU_CROSS_PLATFORM_SERVICES.md` | GNU utilities, Inetutils/GnuTLS service roles and Windows MSYS2/Cygwin/WSL2 interoperability |
+| `docs/LICENSING.md` | GPLv3-or-later project license and third-party licensing boundaries |
 | `docs/KORONOS_DISTRIBUTED_RUNTIME.md` | High concurrency, native process orchestration and trusted Chimera node communication |
 | `docs/LINUX_DESKTOP_AURORA.md` | Linux desktop profiles, Aurora, availability, startup and recovery |
 | `docs/DESKTOP_API.md` | Jakarta REST, desktop selection and launch-plan contract |
 | `docs/SOURCE_MIGRATION_MANIFEST.md` | Native-to-Java provenance and non-portable boundaries |
 | `docs/superpowers/specs/2026-09-09-linux-desktop-aurora-design.md` | Approved design record and implementation requirements |
+| `docs/superpowers/specs/2026-09-09-gnu-cross-platform-services-design.md` | GNU services and licensing design |
+| `docs/superpowers/plans/2026-09-09-gnu-cross-platform-services.md` | GNU services and licensing implementation plan |
 
 ## Source organization
 
@@ -26,7 +30,7 @@ This directory documents the Java 25 implementation track of Chimera II OS. Docu
 src/main/java/org/chimera/
 ├── api/          Jakarta REST resources
 ├── cognition/    Koronos 128D and knowledge/evidence runtime
-├── compat/       Windows/Linux/Unix/macOS/filesystem/network compatibility catalogs
+├── compat/       GNU, Windows/Linux/Unix/macOS/filesystem/network compatibility catalogs
 ├── core/         8192-bit register and CPU semantic foundation
 ├── koronos/      Kernel lifecycle, learning, concurrency and persistence
 ├── network/      Trusted-node identity, trust policy, signed messages and federation transport
@@ -37,7 +41,7 @@ src/main/java/org/chimera/
 
 ## Current compatibility coverage
 
-`NetworkScannerCatalog` inventories common IPv4/IPv6 discovery and scanning tools including Nmap. `FileSystemCatalog` covers major Windows, Linux, Unix/BSD and Apple filesystems plus SMB/NFS and pseudo-filesystem families. `WindowsCompatibilityCatalog` models Win16, Win32, Win64/PE32+, modern Windows Server and ARM64 targets. `NetworkInteroperabilityCatalog` models Samba, NFS, SMB browsing, LDAP, Kerberos and mDNS roles. `MacNetworkCatalog` models macOS Tahoe 26 networking and Finder integration.
+`GnuPlatformCatalog` inventories common GNU utilities, network services and Windows delivery providers. `NetworkScannerCatalog` inventories common IPv4/IPv6 discovery and scanning tools including Nmap. `FileSystemCatalog` covers major Windows, Linux, Unix/BSD and Apple filesystems plus SMB/NFS and pseudo-filesystem families. `WindowsCompatibilityCatalog` models Win16, Win32, Win64/PE32+, modern Windows Server and ARM64 targets. `NetworkInteroperabilityCatalog` models Samba, NFS, SMB browsing, LDAP, Kerberos and mDNS roles. `MacNetworkCatalog` models macOS Tahoe 26 networking and Finder integration.
 
 The Library `W2K-ASM.txt` is integrated by architectural provenance metadata through `W2kAsmCompatibilityManifest`; the full supplied corpus is not redistributed into the public repository because it carries Microsoft Confidential/proprietary notices.
 
@@ -54,7 +58,8 @@ Documentation must:
 7. document persistent learning separately from native hardware semantics;
 8. document external runtime versions as refreshable catalog data;
 9. keep trust and process execution behind explicit security boundaries;
-10. keep build/test instructions aligned with the CI workflow.
+10. keep build/test instructions aligned with the CI workflow;
+11. preserve third-party copyright and license terms when integrating external software.
 
 ## Current kernel coverage
 
@@ -69,6 +74,10 @@ The kernel also exposes virtual-thread I/O execution, bounded CPU worker executi
 ## Current Linux runtime coverage
 
 `LinuxRuntimeCatalog` models Python, OpenJDK, Firefox, Chrome, Bash, Zsh, PowerShell, .NET, NGINX, BIND 9 and Postfix, plus Kali security metapackages and a top-tool catalog. `LinuxRuntimeManager` converts that inventory into distro-aware dnf/apt and systemd command plans without executing them. The catalog does not vendor third-party binaries; native package managers remain responsible for installation and signatures.
+
+## Current licensing coverage
+
+The original Java-track source and original documentation are licensed under GPL-3.0-or-later. `docs/LICENSING.md` defines the boundary between project-owned code and external components. External dependencies, operating systems, GNU projects, Microsoft components and Apple components retain their own licensing terms.
 
 ## Build verification
 

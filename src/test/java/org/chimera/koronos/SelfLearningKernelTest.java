@@ -11,14 +11,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class SelfLearningKernelTest {
     @Test
     void persistsObservationsAndLearnedStateAcrossKernelInstances(@TempDir Path dataDir) throws Exception {
+        Vector128D learnedState;
         try (KoronosKernel first = new KoronosKernel(dataDir)) {
             first.boot();
             var input = new Vector128D();
-            input.copy()[0] = 0.75;
+            input.set(0, 0.75);
             var target = new Vector128D();
-            target.copy()[0] = 0.25;
+            target.set(0, 0.25);
             first.observe(input);
             first.learn(input, target);
+            learnedState = first.learnedState();
             assertEquals(1, first.observationCount());
             assertTrue(first.snapshotCount() >= 1);
         }
@@ -28,6 +30,7 @@ class SelfLearningKernelTest {
             assertEquals(1, second.observationCount());
             assertTrue(second.snapshotCount() >= 1);
             assertNotNull(second.lastLearningLoss());
+            assertEquals(learnedState, second.learnedState());
         }
     }
 

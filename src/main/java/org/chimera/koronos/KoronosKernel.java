@@ -22,6 +22,7 @@ public final class KoronosKernel implements AutoCloseable {
     private final ChimeraCpu cpu=new ChimeraCpu();
     private final KoronosRnn128 cognition=new KoronosRnn128(LEARNING_RATE,MODEL_SEED);
     private final KernelDataStore dataStore;
+    private final Path dataDirectory;
     private final ExecutorService virtualThreads=Executors.newVirtualThreadPerTaskExecutor();
     private volatile boolean running;
 
@@ -29,13 +30,15 @@ public final class KoronosKernel implements AutoCloseable {
 
     public KoronosKernel(Path dataDirectory) {
         if (dataDirectory == null) throw new IllegalArgumentException("dataDirectory must not be null");
-        dataStore = new H2KernelDataStore(dataDirectory);
+        this.dataDirectory=dataDirectory.toAbsolutePath().normalize();
+        dataStore = new H2KernelDataStore(this.dataDirectory);
         var model = dataStore.latestModel();
         if (model != null) cognition.restore(model);
     }
 
     public void boot(){running=true;}
     public boolean running(){return running;}
+    public Path dataDirectory(){return dataDirectory;}
 
     /** Observe telemetry, persist the observation, and checkpoint the learned recurrent state. */
     public synchronized Vector128D observe(Vector128D telemetry){
@@ -57,6 +60,7 @@ public final class KoronosKernel implements AutoCloseable {
         return loss;
     }
 
+    public Vector128D learnedState(){return cognition.state();}
     public long observationCount(){return dataStore.observationCount();}
     public long snapshotCount(){return dataStore.snapshotCount();}
     public Double lastLearningLoss(){return dataStore.lastLearningLoss();}

@@ -12,6 +12,7 @@ This directory documents the Java 25 implementation track of Chimera II OS. Docu
 | `docs/JAVA_RUNTIME_ARCHITECTURE.md` | End-to-end Java architecture and subsystem relationships |
 | `docs/KERNEL_LEARNING_DATABASE.md` | Self-learning kernel loop, H2 persistence and restart behavior |
 | `docs/LINUX_RUNTIME_STACK.md` | Python, Java, browsers, shells, PowerShell, .NET, HTTP, DNS, mail and Kali integration |
+| `docs/LINUX_RUNTIME_INSTALLATION.md` | Distro-aware package/service planning and installation security boundaries |
 | `docs/KORONOS_DISTRIBUTED_RUNTIME.md` | High concurrency, native process orchestration and trusted Chimera node communication |
 | `docs/LINUX_DESKTOP_AURORA.md` | Linux desktop profiles, Aurora, availability, startup and recovery |
 | `docs/DESKTOP_API.md` | Jakarta REST, desktop selection and launch-plan contract |
@@ -26,8 +27,8 @@ src/main/java/org/chimera/
 ├── cognition/    Koronos 128D and knowledge/evidence runtime
 ├── core/         8192-bit register and CPU semantic foundation
 ├── koronos/      Kernel lifecycle, learning, concurrency and persistence
-├── network/      Trusted-node identity, trust policy and signed messages
-├── runtime/      Linux runtime/service/security catalog
+├── network/      Trusted-node identity, trust policy, signed messages and federation transport
+├── runtime/      Linux runtime/service/security catalog and command planning
 └── desktop/      Linux desktop/session orchestration
     └── freedesktop/ XDG and desktop-entry models
 ```
@@ -55,11 +56,11 @@ The kernel now also exposes virtual-thread I/O execution, bounded CPU worker exe
 
 ## Current federation coverage
 
-`TrustedChimeraNode`, `ChimeraTrustStore` and `ChimeraNodeMessage` provide explicit Ed25519 identity and signed-message verification. A node must explicitly trust a sender's public key; payload tampering and stale messages are rejected.
+`TrustedChimeraNode`, `ChimeraTrustStore`, `PersistentChimeraTrustStore` and `ChimeraNodeMessage` provide explicit Ed25519 identity, durable public-key trust and signed-message verification. `ChimeraFederationClient` gates outbound traffic on explicit peer trust and requires HTTPS outside localhost/lab endpoints. Payload tampering and stale messages remain rejected by signed-message verification.
 
 ## Current Linux runtime coverage
 
-`LinuxRuntimeCatalog` models Python, OpenJDK, Firefox, Chrome, Bash, Zsh, PowerShell, .NET, NGINX, BIND 9 and Postfix, plus Kali security metapackages and a top-tool catalog. The catalog does not vendor third-party binaries; native package managers remain responsible for installation and signatures.
+`LinuxRuntimeCatalog` models Python, OpenJDK, Firefox, Chrome, Bash, Zsh, PowerShell, .NET, NGINX, BIND 9 and Postfix, plus Kali security metapackages and a top-tool catalog. `LinuxRuntimeManager` converts that inventory into distro-aware dnf/apt and systemd command plans without executing them. The catalog does not vendor third-party binaries; native package managers remain responsible for installation and signatures.
 
 ## Current desktop coverage
 

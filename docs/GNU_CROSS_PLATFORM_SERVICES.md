@@ -1,6 +1,6 @@
 # GNU / Open-Source Cross-Platform Services
 
-Chimera II now exposes a declarative GNU/open-source interoperability catalog through `org.chimera.compat.GnuPlatformCatalog`.
+Chimera II exposes a declarative GNU/open-source interoperability catalog through `org.chimera.compat.GnuPlatformCatalog`, complemented by `org.chimera.compat.OpenSourceApplicationCatalog` for mature desktop, development, networking, storage, virtualization and multimedia applications.
 
 ## Utility coverage
 
@@ -14,6 +14,23 @@ The catalog includes:
 - Cryptographic transport: GnuTLS client/server roles.
 
 These entries describe package/service targets. Chimera does not redistribute the external binaries.
+
+## Extended open-source application layer
+
+The application catalog adds a practical workstation/server ecosystem around the GNU base:
+
+- Office: LibreOffice.
+- Creative: GIMP, Inkscape, Krita, Blender.
+- Multimedia: VLC, Audacity, OBS Studio, Kdenlive.
+- Communication/documents: Thunderbird, Okular, Calibre.
+- Development: Git, Kate and existing GCC/GDB/build tooling.
+- Networking/security: OpenSSH, Wireshark, curl, Wget, FileZilla, PuTTY, KeePassXC, WireGuard, OpenVPN.
+- Virtualization/containers: QEMU, VirtualBox, libvirt, virt-manager, Docker Engine, Podman.
+- Storage/backup: rclone, Syncthing, restic.
+- Desktop: KDE Dolphin, Kate, Konsole and GNOME Files/System Monitor.
+- Archive: 7-Zip alongside GNU archive/compression tools.
+
+See `docs/OPEN_SOURCE_APPLICATIONS_RESEARCH.md` for the research evidence, priority tiers and licensing boundaries.
 
 ## Network service coverage
 
@@ -37,7 +54,7 @@ GNU software is not uniformly native to Windows. The catalog therefore distingui
 3. **WSL2** — Linux environment hosted by Windows.
 4. **Native port** — only where a maintained Win32 build exists.
 
-Windows-native service supervision remains Windows-native; Linux daemons remain Linux daemons when executed inside WSL2.
+The broader open-source application catalog similarly records whether an application has Linux and Windows delivery paths. Windows-native service supervision remains Windows-native; Linux daemons remain Linux daemons when executed inside WSL2.
 
 ## Linux integration
 
@@ -49,4 +66,4 @@ Network services are cataloged for interoperability and administration. Enabling
 
 ## Licensing
 
-The original Chimera II Java-track source is GPL-3.0-or-later. External GNU projects, libraries, operating systems and service implementations retain their own licenses. See `docs/LICENSING.md`.
+The original Chimera II Java-track source is GPL-3.0-or-later. External GNU projects, libraries, operating systems and service implementations retain their own licenses. Application licenses may be GPL, LGPL, MPL, Apache, BSD, MIT or project-specific terms and must be preserved individually. See `docs/LICENSING.md` and `docs/OPEN_SOURCE_APPLICATIONS_RESEARCH.md`.

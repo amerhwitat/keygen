@@ -38,7 +38,7 @@ Profile definition and host availability are separate. The runtime detects Wayla
 
 Jakarta REST exposes `/api/desktop/profiles`, `/api/desktop/current`, and `/api/desktop/select/{id}`. The selection endpoint creates a launch plan and does not execute it.
 
-The desktop integration follows the freedesktop desktop-entry model used for interoperable application launch metadata. citeturn0search0
+The desktop integration follows the freedesktop desktop-entry model used for interoperable application launch metadata.
 
 ## Important scope
 

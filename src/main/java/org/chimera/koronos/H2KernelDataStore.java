@@ -14,6 +14,9 @@ import java.sql.Statement;
 /** H2-backed embedded kernel database. The database is created below the supplied data directory. */
 public final class H2KernelDataStore implements KernelDataStore {
     public static final String DATABASE_FILE = "kernel";
+    private static final long MAX_OBSERVATIONS = 10_000;
+    private static final long MAX_LEARNING_EVENTS = 10_000;
+    private static final long MAX_MODEL_SNAPSHOTS = 128;
     private final Connection connection;
 
     public H2KernelDataStore(Path dataDirectory) {
@@ -39,6 +42,7 @@ public final class H2KernelDataStore implements KernelDataStore {
         try (var p = connection.prepareStatement("INSERT INTO observations(created_at, vector) VALUES (CURRENT_TIMESTAMP, ?)");) {
             p.setString(1, encode(observation));
             p.executeUpdate();
+            trim("observations", MAX_OBSERVATIONS);
         } catch (SQLException e) { throw failure(e); }
     }
 
@@ -46,6 +50,7 @@ public final class H2KernelDataStore implements KernelDataStore {
         try (var p = connection.prepareStatement("INSERT INTO learning_events(created_at, loss) VALUES (CURRENT_TIMESTAMP, ?)");) {
             p.setDouble(1, loss);
             p.executeUpdate();
+            trim("learning_events", MAX_LEARNING_EVENTS);
         } catch (SQLException e) { throw failure(e); }
     }
 
@@ -53,6 +58,7 @@ public final class H2KernelDataStore implements KernelDataStore {
         try (var p = connection.prepareStatement("INSERT INTO model_snapshots(created_at, model) VALUES (CURRENT_TIMESTAMP, ?)");) {
             p.setBytes(1, modelState.clone());
             p.executeUpdate();
+            trim("model_snapshots", MAX_MODEL_SNAPSHOTS);
         } catch (SQLException e) { throw failure(e); }
     }
 
@@ -70,6 +76,13 @@ public final class H2KernelDataStore implements KernelDataStore {
         try (var p = connection.prepareStatement("SELECT model FROM model_snapshots ORDER BY id DESC LIMIT 1"); ResultSet r = p.executeQuery()) {
             return r.next() ? r.getBytes(1) : null;
         } catch (SQLException e) { throw failure(e); }
+    }
+
+    private void trim(String table, long maximum) throws SQLException {
+        try (var p = connection.prepareStatement("DELETE FROM " + table + " WHERE id < (SELECT COALESCE(MAX(id), 0) - ? FROM " + table + ")")) {
+            p.setLong(1, maximum - 1);
+            p.executeUpdate();
+        }
     }
 
     private long count(String table) {

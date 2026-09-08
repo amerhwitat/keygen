@@ -1,72 +1,166 @@
 # Chimera II OS — Java 25 / Koronos 128D
 
-This repository is the **isolated Java implementation track** for Chimera II OS. It does not modify `amerhwitat/ChimeraIIOS` or `amerhwitat/test`.
+This repository is the **isolated Java implementation track** for Chimera II OS. It provides a semantic JVM model of the Chimera processor/kernel concepts, the Koronos 128D research runtime, and a Linux desktop/session orchestration layer.
 
-## Targets
+> **Scope boundary:** this repository does not modify `amerhwitat/ChimeraIIOS` or `amerhwitat/test`. Native Chimera remains the source-of-record for hardware, boot, ABI, driver, compositor, and platform-specific behavior.
 
-- Java SE / JDK 25 baseline.
-- Maven build.
-- Jakarta EE 11 integration profile.
-- 8192-bit Chimera register model represented by 128 x 64-bit lanes.
-- Canonical 16-byte instruction packet decoder.
-- Java implementation of the core R8192 ALU semantics.
-- 128-dimensional state/tensor representation.
-- Recurrent learning prototype for the Koronos cognitive runtime.
-- REST/Jakarta EE boundary for kernel telemetry and inference.
-- Linux desktop runtime covering Fedora, Ubuntu, Debian and Aurora/Wayland profiles.
-- Freedesktop/XDG desktop-entry integration and structured startup launch plans.
-- Installed-launcher probing before a desktop profile is exposed as selectable.
-- Safe/minimal and headless recovery fallback when the preferred desktop cannot launch.
-- Explicit provenance/migration ledger for native source files.
+## Project status
 
-## Linux desktop runtime
+- Java 25 / Maven baseline.
+- Jakarta EE 11 integration.
+- 8192-bit register model represented as 128 × 64-bit lanes.
+- Canonical 16-byte Chimera instruction representation.
+- Core R8192 ALU semantic model.
+- 128D vector/state representation.
+- Deterministic Koronos recurrent-learning research prototype.
+- Knowledge/evidence bus and REST service boundary.
+- Linux desktop startup/session model for Aurora, Fedora, Ubuntu, Debian and common desktop environments.
+- Freedesktop/XDG metadata model.
+- Launcher-aware availability probing and safe startup fallback.
+- Explicit native-source migration/provenance manifest.
+- CI verification with JDK 25 and Maven tests.
 
-The additive `org.chimera.desktop` layer provides a data-driven startup menu for:
+## Architecture
 
-- Chimera Aurora / Wayland
-- Fedora GNOME
-- Ubuntu GNOME
-- Debian GNOME
-- KDE Plasma
-- Xfce
-- Cinnamon
-- MATE
-- LXQt
-- GNOME Flashback
-- Safe / Minimal
-- Headless / Server
+```text
+Native Chimera source-of-record
+            │
+            │ semantic migration / conformance
+            ▼
+┌─────────────────────────────────────────────┐
+│              Java 25 Runtime                │
+├─────────────────────────────────────────────┤
+│ Chimera CPU / ISA │ Kernel / services       │
+│ 8192-bit register │ Jakarta EE REST         │
+│ 16-byte instruction│ Virtual-thread runtime │
+├─────────────────────────────────────────────┤
+│              Koronos 128D                   │
+│ vector state → recurrent state → evidence   │
+│ bounded adaptation → observable output      │
+├─────────────────────────────────────────────┤
+│          Linux Desktop Runtime              │
+│ profiles → capability probe → launcher      │
+│ validation → structured launch plan         │
+│ Aurora / Wayland / X11 / recovery           │
+└─────────────────────────────────────────────┘
+            │
+            ▼
+ Native Linux compositor / session / driver
+```
 
-Profile definition and host availability are separate. The runtime detects Wayland/X11/session capabilities and probes the executable candidates for each profile before marking the profile available. Multiple candidates are supported, so KDE Plasma can prefer Wayland and fall back to X11 when the corresponding launcher is installed.
+The Java layer deliberately models native boundaries rather than pretending that a JVM can execute x86 boot code, replace a kernel, or reimplement every desktop compositor.
 
-`DesktopSessionManager.defaultPlan()` prefers the Aurora default only when it is actually selectable, then falls back to Safe / Minimal and finally Headless / Server. This prevents the startup path from selecting a profile whose launcher is absent.
+## Linux desktop and Aurora
 
-Actual GNOME/KDE/Xfce/Cinnamon/MATE/LXQt sessions remain native Linux software; Java does not reimplement their compositors. The Java layer owns profile selection, capability/launcher validation, structured process plans, and integration metadata.
+The `org.chimera.desktop` package provides a data-driven startup menu covering:
 
-Jakarta REST exposes `/api/desktop/profiles`, `/api/desktop/current`, and `/api/desktop/select/{id}`. The selection endpoint creates a launch plan and does not execute it.
+- **Chimera Aurora / Wayland**
+- **Fedora GNOME**
+- **Ubuntu GNOME**
+- **Debian GNOME**
+- **KDE Plasma** (Wayland/X11 candidates)
+- **Xfce**
+- **Cinnamon**
+- **MATE**
+- **LXQt**
+- **GNOME Flashback**
+- **Safe / Minimal** recovery
+- **Headless / Server** recovery
 
-The desktop integration follows the freedesktop desktop-entry model used for interoperable application launch metadata.
+The registry is distribution-aware but does not bundle Fedora, Debian, Ubuntu, Aurora, GNOME, KDE or other desktop packages. A profile describes what the runtime knows how to launch; **availability is determined at runtime**.
 
-## Important scope
+Startup selection is fail-safe:
 
-A mechanical C/C++/ASM-to-Java translation cannot preserve hardware/ABI behavior one-to-one. Java therefore implements the **semantic model** of the ISA/kernel while retaining the native source as the source-of-record. Native-only concerns such as boot ROM execution, MMIO, CPU instructions, DMA hardware, and kernel privilege transitions are represented by Java service interfaces/simulators.
+1. prefer the configured Aurora/default profile when its session capabilities and launcher are available;
+2. otherwise select Safe / Minimal;
+3. otherwise select Headless / Server.
 
-The 128D/RNN component is a research prototype, not a claim of artificial general intelligence or autonomous superintelligence. It provides a trainable recurrent model and self-improvement hooks under explicit policy/telemetry control.
+Launcher candidates are validated without invoking a shell. Actual execution is delegated through a structured `ProcessBuilder` boundary or an application-supplied native adapter.
 
-## Build
+### Desktop API
+
+Jakarta REST exposes:
+
+- `GET /api/desktop/profiles` — profile inventory and availability metadata.
+- `GET /api/desktop/current` — current/default desktop selection state.
+- `GET /api/desktop/select/{id}` — validates a profile and returns a structured launch plan; it **does not execute** the process.
+
+The API is intentionally separated from process execution so a graphical, TUI, web, display-manager or native Aurora frontend can render the same startup menu.
+
+## Freedesktop/XDG integration
+
+The Java desktop layer models common freedesktop concepts needed for interoperable desktop integration:
+
+- desktop-entry fields;
+- application categories;
+- `OnlyShowIn` / `NotShowIn` constraints;
+- D-Bus activation metadata;
+- XDG data/config/cache/runtime locations;
+- current desktop/session type;
+- Wayland/X11/D-Bus/portal/audio/GPU capability observations.
+
+It does not replace the native desktop's session manager, display manager, portal implementation or compositor.
+
+## Chimera CPU / ISA
+
+The Java processor model follows the documented semantic representation:
+
+- 8192-bit general-purpose register model;
+- 128 lanes × 64 bits per register;
+- 16-byte canonical instruction packet;
+- opcode and register fields represented explicitly;
+- arithmetic, logical, shifts/rotates, multiply, move, divide/remainder and comparison semantics implemented in the current Java subset;
+- privilege-sensitive operations represented by explicit Java policy/service boundaries.
+
+The complete native ISA remains the authoritative source. Where a mechanical translation would change ABI or hardware semantics, the Java implementation uses a semantic model and records the mapping in `docs/SOURCE_MIGRATION_MANIFEST.md`.
+
+## Koronos 128D
+
+Koronos is a bounded research runtime around a 128-dimensional state representation. The current recurrent implementation is deterministic under a supplied seed and supports bounded self-supervised adaptation.
+
+The 128D representation is an architectural abstraction, not a claim that physical reality has exactly 128 fundamental dimensions. The project also makes no claim of AGI or autonomous superintelligence.
+
+## Build and test
+
+Requirements:
+
+- JDK 25
+- Maven 3.9+ recommended
 
 ```bash
 mvn test
 mvn package
 ```
 
-## Java version
+CI uses JDK 25 and verifies the Maven project without launching a real desktop compositor.
 
-JDK 25 is the primary target. OpenJDK publishes production-ready JDK 25 binaries; Java SE 25 defines the current Java 25 API/specification surface.
+## Running in a Linux host
 
-## Deep learning
+The Java runtime can be embedded in a native Linux launcher, service, application server or future Aurora shell. A normal desktop deployment should provide the desired compositor/session packages through the host distribution.
 
-The project is engine-neutral at the core and can integrate Deep Java Library (DJL). DJL provides NDArray/neural-network/training APIs and can switch among supported engines.
+For example, the host may provide `gnome-session`, `startplasma-wayland`, `startplasma-x11`, `startxfce4`, `cinnamon-session`, `mate-session`, or `startlxqt`. The registry treats these as candidates and checks what is actually installed before presenting a profile as selectable.
 
-## Enterprise
+The Java process itself is not a replacement for the Linux display manager or compositor.
 
-Jakarta EE 11 is the supported enterprise profile. Jakarta EE 12 is tracked as a future/development target and is not required by the baseline build.
+## Documentation map
+
+- [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) — documentation map and maintenance rules.
+- [`docs/LINUX_DESKTOP_AURORA.md`](docs/LINUX_DESKTOP_AURORA.md) — desktop architecture, profiles, startup, recovery and XDG integration.
+- [`docs/JAVA_RUNTIME_ARCHITECTURE.md`](docs/JAVA_RUNTIME_ARCHITECTURE.md) — CPU, kernel, 128D, service and desktop architecture.
+- [`docs/DESKTOP_API.md`](docs/DESKTOP_API.md) — Jakarta REST and launch-plan contract.
+- [`docs/SOURCE_MIGRATION_MANIFEST.md`](docs/SOURCE_MIGRATION_MANIFEST.md) — native-to-Java provenance and portability boundaries.
+- [`docs/superpowers/specs/2026-09-09-linux-desktop-aurora-design.md`](docs/superpowers/specs/2026-09-09-linux-desktop-aurora-design.md) — approved desktop integration design.
+
+## Compatibility and non-goals
+
+This project is additive and preserves the existing Java ABI/API wherever possible. It does not:
+
+- replace the Linux kernel;
+- replace systemd or a display manager;
+- reimplement GNOME, KDE Plasma, Xfce, Cinnamon, MATE or LXQt in Java;
+- execute native x86 boot sectors inside the JVM;
+- emulate real hardware MMIO/DMA/GPU behavior unless an explicit simulator/adapter exists;
+- silently claim complete parity with the native Chimera implementation;
+- bundle an entire Linux distribution or root filesystem.
+
+For native behavior, use the native Chimera repository and the documented Java adapter boundaries.

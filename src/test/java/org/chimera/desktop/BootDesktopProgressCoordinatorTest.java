@@ -11,7 +11,7 @@ class BootDesktopProgressCoordinatorTest {
 
         assertEquals(0, coordinator.bootPercent());
         coordinator.completeBootStage("firmware / platform discovery");
-        assertEquals(12, coordinator.bootPercent());
+        assertEquals(13, coordinator.bootPercent());
         coordinator.completeBootStage("memory and register initialization");
         assertEquals(25, coordinator.bootPercent());
     }

@@ -1,6 +1,6 @@
 # Chimera II OS — Java 25 / Koronos 128D
 
-This repository is the **isolated Java implementation track** for Chimera II OS. It provides a semantic JVM model of the Chimera processor/kernel concepts, the Koronos 128D research runtime, and a Linux desktop/session orchestration layer.
+This repository is the **isolated Java implementation track** for Chimera II OS. It provides a semantic JVM model of the Chimera processor/kernel concepts, the Koronos 128D research runtime, a persistent self-learning kernel layer, and a Linux desktop/session orchestration layer.
 
 > **Scope boundary:** this repository does not modify `amerhwitat/ChimeraIIOS` or `amerhwitat/test`. Native Chimera remains the source-of-record for hardware, boot, ABI, driver, compositor, and platform-specific behavior.
 
@@ -13,6 +13,8 @@ This repository is the **isolated Java implementation track** for Chimera II OS.
 - Core R8192 ALU semantic model.
 - 128D vector/state representation.
 - Deterministic Koronos recurrent-learning research prototype.
+- **Persistent self-learning Koronos kernel.**
+- **Embedded H2 kernel database at `/var/Cimera/Data/kernel.mv.db` by default.**
 - Knowledge/evidence bus and REST service boundary.
 - Linux desktop startup/session model for Aurora, Fedora, Ubuntu, Debian and common desktop environments.
 - Freedesktop/XDG metadata model.
@@ -34,9 +36,14 @@ Native Chimera source-of-record
 │ 8192-bit register │ Jakarta EE REST         │
 │ 16-byte instruction│ Virtual-thread runtime │
 ├─────────────────────────────────────────────┤
-│              Koronos 128D                   │
+│          Koronos 128D cognition             │
 │ vector state → recurrent state → evidence   │
-│ bounded adaptation → observable output      │
+│ bounded adaptation → persisted model        │
+├─────────────────────────────────────────────┤
+│       Persistent Self-Learning Kernel        │
+│ observations → adaptation → loss → snapshot │
+│                 ↓                           │
+│       H2 → /var/Cimera/Data/kernel.mv.db    │
 ├─────────────────────────────────────────────┤
 │          Linux Desktop Runtime              │
 │ profiles → capability probe → launcher      │
@@ -49,6 +56,27 @@ Native Chimera source-of-record
 ```
 
 The Java layer deliberately models native boundaries rather than pretending that a JVM can execute x86 boot code, replace a kernel, or reimplement every desktop compositor.
+
+## Self-learning kernel and internal database
+
+`KoronosKernel` now learns continuously from its telemetry observation path. Each observation is processed through the 128D recurrent model and a bounded self-supervised update, then persisted together with its learning loss and complete recurrent model snapshot.
+
+Default storage:
+
+```text
+/var/Cimera/Data/
+└── kernel.mv.db
+```
+
+The persisted database contains:
+
+- telemetry observations;
+- learning events and loss values;
+- complete recurrent model snapshots containing weights, bias and hidden state.
+
+A fresh `KoronosKernel` instance loads the latest model snapshot, so learned state survives process restart. Tests inject temporary database directories and never depend on the production `/var` path.
+
+The learning mechanism is intentionally bounded: it cannot rewrite kernel code, the ISA/ABI, privilege policy, executable paths or native binaries. It is a research adaptive-kernel mechanism and is not represented as AGI, consciousness or autonomous superintelligence.
 
 ## Linux desktop and Aurora
 
@@ -116,7 +144,7 @@ The complete native ISA remains the authoritative source. Where a mechanical tra
 
 ## Koronos 128D
 
-Koronos is a bounded research runtime around a 128-dimensional state representation. The current recurrent implementation is deterministic under a supplied seed and supports bounded self-supervised adaptation.
+Koronos is a bounded research runtime around a 128-dimensional state representation. The current recurrent implementation is deterministic under a supplied seed and supports bounded self-supervised adaptation, model snapshot and restore.
 
 The 128D representation is an architectural abstraction, not a claim that physical reality has exactly 128 fundamental dimensions. The project also makes no claim of AGI or autonomous superintelligence.
 
@@ -140,13 +168,16 @@ The Java runtime can be embedded in a native Linux launcher, service, applicatio
 
 For example, the host may provide `gnome-session`, `startplasma-wayland`, `startplasma-x11`, `startxfce4`, `cinnamon-session`, `mate-session`, or `startlxqt`. The registry treats these as candidates and checks what is actually installed before presenting a profile as selectable.
 
+For production persistence, the service account must have access to `/var/Cimera/Data`; the Java runtime creates the directory when it is missing and permissions allow it. A dedicated non-root service account is recommended.
+
 The Java process itself is not a replacement for the Linux display manager or compositor.
 
 ## Documentation map
 
 - [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) — documentation map and maintenance rules.
+- [`docs/JAVA_RUNTIME_ARCHITECTURE.md`](docs/JAVA_RUNTIME_ARCHITECTURE.md) — CPU, kernel, 128D, persistence and desktop architecture.
+- [`docs/KERNEL_LEARNING_DATABASE.md`](docs/KERNEL_LEARNING_DATABASE.md) — self-learning kernel and H2 persistence reference.
 - [`docs/LINUX_DESKTOP_AURORA.md`](docs/LINUX_DESKTOP_AURORA.md) — desktop architecture, profiles, startup, recovery and XDG integration.
-- [`docs/JAVA_RUNTIME_ARCHITECTURE.md`](docs/JAVA_RUNTIME_ARCHITECTURE.md) — CPU, kernel, 128D, service and desktop architecture.
 - [`docs/DESKTOP_API.md`](docs/DESKTOP_API.md) — Jakarta REST and launch-plan contract.
 - [`docs/SOURCE_MIGRATION_MANIFEST.md`](docs/SOURCE_MIGRATION_MANIFEST.md) — native-to-Java provenance and portability boundaries.
 - [`docs/superpowers/specs/2026-09-09-linux-desktop-aurora-design.md`](docs/superpowers/specs/2026-09-09-linux-desktop-aurora-design.md) — approved desktop integration design.
@@ -161,6 +192,7 @@ This project is additive and preserves the existing Java ABI/API wherever possib
 - execute native x86 boot sectors inside the JVM;
 - emulate real hardware MMIO/DMA/GPU behavior unless an explicit simulator/adapter exists;
 - silently claim complete parity with the native Chimera implementation;
-- bundle an entire Linux distribution or root filesystem.
+- bundle an entire Linux distribution or root filesystem;
+- allow the learning model to modify kernel code, ABI, privilege policy or native binaries.
 
 For native behavior, use the native Chimera repository and the documented Java adapter boundaries.

@@ -10,6 +10,7 @@
     <junit.version>5.13.4</junit.version>
     <djl.version>0.36.0</djl.version>
     <jakarta.platform.version>11.0.0</jakarta.platform.version>
+    <h2.version>2.3.232</h2.version>
   </properties>
   <dependencies>
     <dependency>
@@ -17,6 +18,9 @@
     </dependency>
     <dependency>
       <groupId>jakarta.platform</groupId><artifactId>jakarta.jakartaee-api</artifactId><version>${jakarta.platform.version}</version><scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId><artifactId>h2</artifactId><version>${h2.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>${junit.version}</version><scope>test</scope>

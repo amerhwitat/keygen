@@ -40,17 +40,22 @@ public final class KoronosKernel implements AutoCloseable {
     public boolean running(){return running;}
     public Path dataDirectory(){return dataDirectory;}
 
-    /** Observe telemetry, persist the observation, and checkpoint the learned recurrent state. */
+    /**
+     * Observe telemetry and immediately perform a bounded self-supervised learning step.
+     * The telemetry's bounded tanh representation is the training target, making the kernel
+     * adapt continuously without requiring an external label source.
+     */
     public synchronized Vector128D observe(Vector128D telemetry){
         requireRunning();
         if (telemetry == null) throw new IllegalArgumentException("telemetry must not be null");
-        var state=cognition.step(telemetry);
+        double loss=cognition.adapt(telemetry,telemetry.tanh());
         dataStore.recordObservation(telemetry);
+        dataStore.recordLearning(loss);
         dataStore.saveModel(cognition.snapshot());
-        return state;
+        return cognition.state();
     }
 
-    /** Perform one bounded self-supervised update and persist both the learning event and model. */
+    /** Perform one bounded supervised/self-supervised update and persist both the event and model. */
     public synchronized double learn(Vector128D input,Vector128D target){
         requireRunning();
         if (input == null || target == null) throw new IllegalArgumentException("learning vectors must not be null");
@@ -62,6 +67,7 @@ public final class KoronosKernel implements AutoCloseable {
 
     public Vector128D learnedState(){return cognition.state();}
     public long observationCount(){return dataStore.observationCount();}
+    public long learningCount(){return dataStore.learningCount();}
     public long snapshotCount(){return dataStore.snapshotCount();}
     public Double lastLearningLoss(){return dataStore.lastLearningLoss();}
 

@@ -1,6 +1,8 @@
 package org.chimera.network;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Objects;
@@ -24,7 +26,7 @@ public record ChimeraNodeMessage(String senderId, String messageId, long created
     }
 
     public boolean verify(ChimeraTrustStore trustStore, long maxAgeSeconds) {
-        if (!trustStore.isTrusted(senderId)) return false;
+        if (!trustStore.isTrusted(senderId) || maxAgeSeconds < 0) return false;
         long age = Math.abs(Instant.now().getEpochSecond() - createdAtEpochSecond);
         if (age > maxAgeSeconds) return false;
         TrustedChimeraNode node = trustStore.get(senderId);
@@ -35,6 +37,13 @@ public record ChimeraNodeMessage(String senderId, String messageId, long created
     public String encodedSignature() { return Base64.getEncoder().encodeToString(signature); }
 
     private static byte[] canonical(String id, long time, String topic, byte[] payload) {
-        return (id + "\n" + time + "\n" + topic + "\n").getBytes(StandardCharsets.UTF_8);
+        byte[] idBytes = id.getBytes(StandardCharsets.UTF_8);
+        byte[] topicBytes = topic.getBytes(StandardCharsets.UTF_8);
+        byte[] digest;
+        try { digest = MessageDigest.getInstance("SHA-256").digest(payload); }
+        catch (Exception e) { throw new IllegalStateException(e); }
+        ByteBuffer buffer = ByteBuffer.allocate(4 + idBytes.length + 8 + 4 + topicBytes.length + digest.length);
+        buffer.putInt(idBytes.length).put(idBytes).putLong(time).putInt(topicBytes.length).put(topicBytes).put(digest);
+        return buffer.array();
     }
 }

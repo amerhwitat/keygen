@@ -3,8 +3,6 @@ package org.chimera.koronos;
 import org.chimera.cognition.Vector128D;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -59,6 +57,7 @@ public final class H2KernelDataStore implements KernelDataStore {
     }
 
     @Override public synchronized long observationCount() { return count("observations"); }
+    @Override public synchronized long learningCount() { return count("learning_events"); }
     @Override public synchronized long snapshotCount() { return count("model_snapshots"); }
 
     @Override public synchronized Double lastLearningLoss() {
@@ -87,22 +86,6 @@ public final class H2KernelDataStore implements KernelDataStore {
             b.append(Double.toString(vector.get(i)));
         }
         return b.toString();
-    }
-
-    static byte[] pack(double[] values) {
-        var buffer = ByteBuffer.allocate(4 + values.length * Double.BYTES).order(ByteOrder.BIG_ENDIAN);
-        buffer.putInt(values.length);
-        for (double value : values) buffer.putDouble(value);
-        return buffer.array();
-    }
-
-    static double[] unpack(byte[] bytes) {
-        var buffer = ByteBuffer.wrap(bytes).order(ByteOrder.BIG_ENDIAN);
-        int length = buffer.getInt();
-        if (length < 0 || length > 1_000_000 || buffer.remaining() != length * Double.BYTES) throw new IllegalArgumentException("Invalid model snapshot");
-        var values = new double[length];
-        for (int i = 0; i < length; i++) values[i] = buffer.getDouble();
-        return values;
     }
 
     private static IllegalStateException failure(SQLException e) { return new IllegalStateException("Kernel database operation failed", e); }

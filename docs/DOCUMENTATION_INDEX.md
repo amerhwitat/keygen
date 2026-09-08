@@ -15,6 +15,7 @@ This directory documents the Java 25 implementation track of Chimera II OS. Docu
 | `docs/LINUX_RUNTIME_INSTALLATION.md` | Distro-aware package/service planning and installation security boundaries |
 | `docs/CROSS_PLATFORM_COMPATIBILITY.md` | IPv4/IPv6 scanners, Windows/Win32 compatibility, W2K-ASM provenance, filesystems, SMB, AD, NFS, Samba and macOS/Finder |
 | `docs/GNU_CROSS_PLATFORM_SERVICES.md` | GNU utilities, Inetutils/GnuTLS service roles and Windows MSYS2/Cygwin/WSL2 interoperability |
+| `docs/OPEN_SOURCE_APPLICATIONS_RESEARCH.md` | Deep research catalog of open-source Windows/Linux applications and integration priorities |
 | `docs/LICENSING.md` | GPLv3-or-later project license and third-party licensing boundaries |
 | `docs/KORONOS_DISTRIBUTED_RUNTIME.md` | High concurrency, native process orchestration and trusted Chimera node communication |
 | `docs/LINUX_DESKTOP_AURORA.md` | Linux desktop profiles, Aurora, availability, startup and recovery |
@@ -30,7 +31,7 @@ This directory documents the Java 25 implementation track of Chimera II OS. Docu
 src/main/java/org/chimera/
 ├── api/          Jakarta REST resources
 ├── cognition/    Koronos 128D and knowledge/evidence runtime
-├── compat/       GNU, Windows/Linux/Unix/macOS/filesystem/network compatibility catalogs
+├── compat/       GNU, open-source application, Windows/Linux/Unix/macOS/filesystem/network catalogs
 ├── core/         8192-bit register and CPU semantic foundation
 ├── koronos/      Kernel lifecycle, learning, concurrency and persistence
 ├── network/      Trusted-node identity, trust policy, signed messages and federation transport
@@ -41,9 +42,15 @@ src/main/java/org/chimera/
 
 ## Current compatibility coverage
 
-`GnuPlatformCatalog` inventories common GNU utilities, network services and Windows delivery providers. `NetworkScannerCatalog` inventories common IPv4/IPv6 discovery and scanning tools including Nmap. `FileSystemCatalog` covers major Windows, Linux, Unix/BSD and Apple filesystems plus SMB/NFS and pseudo-filesystem families. `WindowsCompatibilityCatalog` models Win16, Win32, Win64/PE32+, modern Windows Server and ARM64 targets. `NetworkInteroperabilityCatalog` models Samba, NFS, SMB browsing, LDAP, Kerberos and mDNS roles. `MacNetworkCatalog` models macOS Tahoe 26 networking and Finder integration.
+`GnuPlatformCatalog` inventories common GNU utilities, network services and Windows delivery providers. `OpenSourceApplicationCatalog` adds a curated cross-platform application inventory spanning office, graphics, multimedia, communication, security, networking, development, virtualization, containers, storage, backup, documents and desktop administration. `NetworkScannerCatalog` inventories common IPv4/IPv6 discovery and scanning tools including Nmap. `FileSystemCatalog` covers major Windows, Linux, Unix/BSD and Apple filesystems plus SMB/NFS and pseudo-filesystem families. `WindowsCompatibilityCatalog` models Win16, Win32, Win64/PE32+, modern Windows Server and ARM64 targets. `NetworkInteroperabilityCatalog` models Samba, NFS, SMB browsing, LDAP, Kerberos and mDNS roles. `MacNetworkCatalog` models macOS Tahoe 26 networking and Finder integration.
 
 The Library `W2K-ASM.txt` is integrated by architectural provenance metadata through `W2kAsmCompatibilityManifest`; the full supplied corpus is not redistributed into the public repository because it carries Microsoft Confidential/proprietary notices.
+
+## Open-source application coverage
+
+The new catalog targets mature applications including LibreOffice, GIMP, Inkscape, Blender, Krita, VLC, Audacity, OBS Studio, Thunderbird, KeePassXC, 7-Zip, Git, OpenSSH, Wireshark, QEMU, VirtualBox, Docker Engine, Podman, rclone, Syncthing, restic, FileZilla, PuTTY, curl, Wget, Kdenlive, Calibre, Okular, KDE Dolphin/Kate/Konsole, GNOME Files/System Monitor, libvirt, virt-manager, WireGuard and OpenVPN.
+
+These entries are integration metadata rather than bundled binaries. Linux distribution package managers and Windows installers/providers remain responsible for signatures, updates and host integration.
 
 ## Documentation rules
 

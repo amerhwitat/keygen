@@ -2,7 +2,7 @@
 
 **Last synchronized:** 2026-09-09
 
-This directory documents the Java 25 implementation track of Chimera II OS. Documentation is organized so that architecture, migration provenance, Linux desktop integration, persistent self-learning, Linux runtime integration and trusted-node federation can be understood independently.
+This directory documents the Java 25 implementation track of Chimera II OS. Documentation is organized so that architecture, migration provenance, Linux desktop integration, persistent self-learning, Linux runtime integration, cross-platform interoperability and trusted-node federation can be understood independently.
 
 ## Primary documents
 
@@ -13,6 +13,7 @@ This directory documents the Java 25 implementation track of Chimera II OS. Docu
 | `docs/KERNEL_LEARNING_DATABASE.md` | Self-learning kernel loop, H2 persistence and restart behavior |
 | `docs/LINUX_RUNTIME_STACK.md` | Python, Java, browsers, shells, PowerShell, .NET, HTTP, DNS, mail and Kali integration |
 | `docs/LINUX_RUNTIME_INSTALLATION.md` | Distro-aware package/service planning and installation security boundaries |
+| `docs/CROSS_PLATFORM_COMPATIBILITY.md` | IPv4/IPv6 scanners, Windows/Win32 compatibility, W2K-ASM provenance, filesystems, SMB, AD, NFS, Samba and macOS/Finder |
 | `docs/KORONOS_DISTRIBUTED_RUNTIME.md` | High concurrency, native process orchestration and trusted Chimera node communication |
 | `docs/LINUX_DESKTOP_AURORA.md` | Linux desktop profiles, Aurora, availability, startup and recovery |
 | `docs/DESKTOP_API.md` | Jakarta REST, desktop selection and launch-plan contract |
@@ -25,6 +26,7 @@ This directory documents the Java 25 implementation track of Chimera II OS. Docu
 src/main/java/org/chimera/
 ├── api/          Jakarta REST resources
 ├── cognition/    Koronos 128D and knowledge/evidence runtime
+├── compat/       Windows/Linux/Unix/macOS/filesystem/network compatibility catalogs
 ├── core/         8192-bit register and CPU semantic foundation
 ├── koronos/      Kernel lifecycle, learning, concurrency and persistence
 ├── network/      Trusted-node identity, trust policy, signed messages and federation transport
@@ -33,6 +35,12 @@ src/main/java/org/chimera/
     └── freedesktop/ XDG and desktop-entry models
 ```
 
+## Current compatibility coverage
+
+`NetworkScannerCatalog` inventories common IPv4/IPv6 discovery and scanning tools including Nmap. `FileSystemCatalog` covers major Windows, Linux, Unix/BSD and Apple filesystems plus SMB/NFS and pseudo-filesystem families. `WindowsCompatibilityCatalog` models Win16, Win32, Win64/PE32+, modern Windows Server and ARM64 targets. `NetworkInteroperabilityCatalog` models Samba, NFS, SMB browsing, LDAP, Kerberos and mDNS roles. `MacNetworkCatalog` models macOS Tahoe 26 networking and Finder integration.
+
+The Library `W2K-ASM.txt` is integrated by architectural provenance metadata through `W2kAsmCompatibilityManifest`; the full supplied corpus is not redistributed into the public repository because it carries Microsoft Confidential/proprietary notices.
+
 ## Documentation rules
 
 Documentation must:
@@ -40,7 +48,7 @@ Documentation must:
 1. describe the current implementation rather than an earlier proposal;
 2. distinguish implemented, modeled and native-only behavior;
 3. preserve the Java API/ABI compatibility intent;
-4. avoid claiming that Java replaces native hardware, browsers, desktop compositors or Linux services;
+4. avoid claiming that Java replaces native hardware, browsers, desktop compositors or operating-system services;
 5. keep Fedora, Ubuntu, Debian and Aurora coverage synchronized with the desktop registry;
 6. record meaningful architectural changes in the migration manifest/design record;
 7. document persistent learning separately from native hardware semantics;
@@ -52,7 +60,7 @@ Documentation must:
 
 `KoronosKernel` performs bounded self-supervised adaptation whenever telemetry is observed. `KernelDataStore` separates kernel learning from persistence, while `H2KernelDataStore` stores observations, learning events and complete 128D model snapshots under `/var/Cimera/Data` by default.
 
-The kernel now also exposes virtual-thread I/O execution, bounded CPU worker execution and isolated native process launching. The process boundary accepts structured argument lists rather than shell command strings.
+The kernel also exposes virtual-thread I/O execution, bounded CPU worker execution and isolated native process launching. The process boundary accepts structured argument lists rather than shell command strings.
 
 ## Current federation coverage
 
@@ -61,12 +69,6 @@ The kernel now also exposes virtual-thread I/O execution, bounded CPU worker exe
 ## Current Linux runtime coverage
 
 `LinuxRuntimeCatalog` models Python, OpenJDK, Firefox, Chrome, Bash, Zsh, PowerShell, .NET, NGINX, BIND 9 and Postfix, plus Kali security metapackages and a top-tool catalog. `LinuxRuntimeManager` converts that inventory into distro-aware dnf/apt and systemd command plans without executing them. The catalog does not vendor third-party binaries; native package managers remain responsible for installation and signatures.
-
-## Current desktop coverage
-
-The Java desktop registry currently models Aurora, Fedora GNOME, Ubuntu GNOME, Debian GNOME, KDE Plasma, Xfce, Cinnamon, MATE, LXQt, GNOME Flashback, Safe/Minimal and Headless/Server.
-
-The menu distinguishes profile definition from host availability and validates launcher availability before normal desktop selection. Recovery profiles remain available as the deterministic fallback path.
 
 ## Build verification
 

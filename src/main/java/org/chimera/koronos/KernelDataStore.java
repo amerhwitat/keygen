@@ -8,6 +8,7 @@ public interface KernelDataStore extends AutoCloseable {
     void recordLearning(double loss);
     void saveModel(byte[] modelState);
     long observationCount();
+    long learningCount();
     long snapshotCount();
     Double lastLearningLoss();
     byte[] latestModel();

@@ -2,104 +2,149 @@
 
 ## Status
 
-Approved by the user on 2026-09-09. Implementation remains isolated to `amerhwitat/keygen`; `amerhwitat/test` and `amerhwitat/ChimeraIIOS` are not modified.
+**Approved and implemented — 2026-09-09.**
+
+Implementation is isolated to `amerhwitat/keygen`. The repositories `amerhwitat/test` and `amerhwitat/ChimeraIIOS` are not modified by this Java integration track.
+
+This document is retained as the design record; implementation details are maintained in the operational desktop guide and API documentation.
 
 ## Goal
 
-Add a Java 25 desktop-runtime layer that models the common desktop/session capabilities used across Fedora, Ubuntu, and Debian, integrates the existing Aurora/Wayland concept as a first-class Chimera flavor, and exposes a data-driven desktop startup/session selection menu.
+Provide a Java 25 desktop-runtime layer that models common Linux desktop/session choices across Fedora, Ubuntu and Debian, integrates Chimera Aurora as a first-class Wayland-oriented flavor, and exposes a deterministic startup/session selection model.
 
 ## Architecture
 
-The desktop layer is an orchestration and compatibility model, not a claim that Java replaces native Linux desktop stacks. Java discovers and describes host capabilities, selects a session profile, prepares environment/launcher metadata, and delegates actual compositor/display-manager execution to native commands or optional adapters.
-
-The implementation uses a stable core API:
-
 ```text
-DesktopRuntime
- ├── DesktopProfileRegistry
- ├── DesktopCapabilityDetector
- ├── DesktopStartupMenu
- ├── DesktopSessionManager
- ├── FreedesktopIntegration
- └── NativeDesktopAdapter
-       ├── Wayland adapter
-       ├── X11 compatibility adapter
-       └── command/process adapter
+DesktopProfileRegistry
+          │
+          ▼
+DesktopCapabilityDetector
+          │
+          ├── session capabilities
+          ├── launcher availability
+          └── host environment
+          │
+          ▼
+DesktopStartupMenu
+          │
+          ▼
+DesktopSessionManager
+          │
+          ▼
+DesktopLaunchPlan
+          │
+          ▼
+ProcessDesktopAdapter / native adapter
 ```
 
-Profiles are data-driven. The baseline registry contains Aurora, Fedora GNOME, Ubuntu GNOME, Debian GNOME, KDE Plasma, Xfce, Cinnamon, MATE, LXQt, GNOME Flashback, Safe/Minimal, and Headless/Server. A profile records desktop name, distribution affinity, display protocol preference, startup command candidates, environment variables, capabilities, and whether it is a native host session or a compatibility/model entry.
+The Java layer is an orchestration/compatibility model. It does not replace the Linux kernel, display manager, compositor, GPU stack or desktop applications.
 
-## Linux desktop coverage
+## Profile model
 
-The project will cover common cross-distribution desktop concepts rather than embedding distribution packages into the JVM:
+The registry is data-driven and currently covers:
 
-- Fedora: GNOME/Wayland baseline, with KDE Plasma and common Xfce/Cinnamon/MATE/LXQt profiles where installed.
-- Ubuntu: GNOME/Wayland baseline, with common KDE Plasma, Xfce, Cinnamon, MATE, and LXQt profiles where installed.
-- Debian: GNOME, KDE Plasma, Xfce, Cinnamon, MATE, LXQt, and GNOME Flashback profiles where installed.
-- Aurora: dedicated Chimera Aurora/Wayland profile, preserving the existing Aurora integration concept while using Java as the session orchestration boundary.
+- Chimera Aurora / Wayland;
+- Fedora GNOME;
+- Ubuntu GNOME;
+- Debian GNOME;
+- KDE Plasma with Wayland/X11 candidates;
+- Xfce;
+- Cinnamon;
+- MATE;
+- LXQt;
+- GNOME Flashback;
+- Safe / Minimal recovery;
+- Headless / Server recovery.
 
-The registry must distinguish **profile availability** from **profile definition**. A profile can be known to the system but unavailable on a particular host.
+A profile has stable identity and metadata independent of whether it is installed on a particular host.
 
-## Startup menu
+## Availability model
 
-The menu is a model/API first, allowing a GUI, TUI, web UI, or native launcher to render it later. Each entry has:
+Availability is calculated at runtime. A normal desktop profile requires:
 
-- stable ID
-- display name
-- distribution
-- desktop environment
-- session type (`wayland`, `x11`, `headless`)
-- availability state
-- default flag
-- launch command candidates
-- safety/recovery flag
+1. a compatible session capability, and
+2. at least one installed launcher candidate.
 
-Selection must validate that the profile exists and is available, then return a launch plan. The Java runtime does not silently execute arbitrary strings from configuration; commands are represented as structured executable + argument lists and validated against the detected host.
+The detector uses environment inspection and executable resolution rather than executing arbitrary commands. This makes the startup menu safe to evaluate before a process is launched.
 
-## Freedesktop/Aurora integration
+## Startup policy
 
-Add Java models for XDG/freedesktop concepts needed by a desktop shell:
+The default policy is deterministic:
 
-- `.desktop` application entries
-- XDG desktop/session environment
-- MIME/application association metadata
-- desktop launch categories
-- Wayland/X11 session detection
-- optional portal capability detection
+```text
+Aurora/default available?
+        │ yes
+        ▼
+     Aurora
+        │ no
+        ▼
+Safe / Minimal available?
+        │ yes
+        ▼
+ Safe / Minimal
+        │ no
+        ▼
+ Headless / Server
+```
 
-Aurora remains a flavor/profile and does not become a fork of every desktop environment.
+Explicit selection of an unavailable profile returns a structured selection error.
 
-## Security and failure handling
+## Structured launch
 
-- Never execute an unavailable profile.
-- Never interpolate untrusted strings into shell commands.
-- Use `ProcessBuilder` argument arrays rather than shell concatenation.
-- Treat environment detection as advisory and fail closed for unknown launchers.
-- Provide Safe/Minimal and Headless fallback profiles.
-- Return structured errors for unsupported sessions rather than crashing the kernel.
+`DesktopLaunchPlan` contains an executable, argument list and environment map. The supplied `ProcessDesktopAdapter` uses `ProcessBuilder(List<String>)`.
 
-## Testing
+No profile value is interpolated into a shell command. Applications may supply a policy-controlled adapter, test double, display-manager bridge or native Aurora launcher.
 
-JUnit tests will verify:
+## Freedesktop/XDG
 
-1. all baseline profiles have stable IDs and required metadata;
-2. Fedora, Ubuntu, Debian, and Aurora profiles are discoverable;
-3. availability detection distinguishes installed and missing commands;
-4. startup menu ordering and default selection are deterministic;
-5. launch plans use structured arguments and reject unavailable profiles;
-6. Wayland/X11/headless detection behaves correctly for controlled environments;
-7. `.desktop` parsing/generation round trips supported fields;
-8. Jakarta REST can expose profile inventory and current selection without starting a desktop process.
+The implementation models common desktop-entry and XDG concepts required for interoperability:
 
-No test may launch a real compositor in CI.
+- `.desktop` type/name/generic-name;
+- executable/icon metadata;
+- categories;
+- desktop visibility constraints;
+- D-Bus activation metadata;
+- XDG data/config/cache/runtime paths;
+- current desktop/session type;
+- Wayland/X11 and common desktop capability observations.
+
+Native desktop autostart and session management remain host responsibilities.
+
+## REST boundary
+
+The Jakarta EE application exposes:
+
+- `GET /api/desktop/profiles`
+- `GET /api/desktop/current`
+- `GET /api/desktop/select/{id}`
+
+The selection resource validates and returns a launch plan but does not execute it. This keeps web/API control separate from native process execution.
 
 ## Compatibility
 
-The existing Java 25, Maven, Jakarta EE 11, Chimera CPU/ISA, Koronos 128D, and cognition APIs remain unchanged. The desktop runtime is additive. Native source-of-record repositories are not modified.
+Existing Java 25, Maven, Jakarta EE 11, Chimera CPU/ISA and Koronos 128D APIs are additive and remain compatible with the Java implementation track. The desktop package does not redefine the native ABI.
+
+## Testing requirements
+
+The implemented test strategy covers:
+
+- stable profile metadata;
+- Fedora/Ubuntu/Debian/Aurora discovery;
+- launcher availability;
+- deterministic startup ordering;
+- unavailable-profile rejection;
+- structured launch arguments;
+- controlled Wayland/X11/headless detection;
+- desktop-entry round trips;
+- deterministic Koronos 128D initialization/output;
+- Jakarta resource behavior without starting a compositor.
+
+CI must never launch a real desktop compositor.
 
 ## Non-goals
 
-- Reimplementing GNOME, KDE Plasma, Xfce, Cinnamon, MATE, or LXQt in Java.
-- Replacing the Linux kernel, systemd, display managers, Wayland compositors, GPU drivers, or X.Org.
-- Bundling distribution packages into the Java repository.
-- Claiming Aurora is a complete standalone Linux distribution unless a separate native image/rootfs project is created.
+- reimplementing GNOME, KDE Plasma, Xfce, Cinnamon, MATE or LXQt in Java;
+- replacing Linux/systemd/display managers;
+- bundling distribution packages;
+- claiming Aurora is a complete standalone Linux distribution;
+- claiming the Java semantic CPU is hardware-equivalent without conformance evidence.

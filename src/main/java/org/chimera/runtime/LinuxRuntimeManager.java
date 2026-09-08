@@ -30,7 +30,7 @@ public final class LinuxRuntimeManager {
         Objects.requireNonNull(distro);
         Objects.requireNonNull(serviceId);
         Objects.requireNonNull(action);
-        if (serviceId.isBlank() || serviceId.indexOf('\0') >= 0 || serviceId.contains("/"))
+        if (serviceId.isBlank() || !serviceId.matches("[A-Za-z0-9_.@+-]+"))
             throw new IllegalArgumentException("Invalid service id");
         var command = List.of("systemctl", action.name().toLowerCase(), serviceId);
         return new CommandPlan(command, "systemd " + action.name().toLowerCase() + " for " + serviceId);

@@ -2,7 +2,7 @@
 
 **Last synchronized:** 2026-09-09
 
-This directory documents the Java 25 implementation track of Chimera II OS. Documentation is organized so that architecture, migration provenance, Linux desktop integration, persistent self-learning, Linux runtime integration, GNU/open-source interoperability, licensing, cross-platform interoperability and trusted-node federation can be understood independently.
+This directory documents the Java 25 implementation track of Chimera II OS. Documentation is organized so that architecture, migration provenance, Linux desktop integration, persistent self-learning, Linux runtime integration, GNU/open-source interoperability, licensing, cross-platform interoperability, trusted-node federation, and startup UX can be understood independently.
 
 ## Primary documents
 
@@ -20,6 +20,8 @@ This directory documents the Java 25 implementation track of Chimera II OS. Docu
 | `docs/KORONOS_DISTRIBUTED_RUNTIME.md` | High concurrency, native process orchestration and trusted Chimera node communication |
 | `docs/LINUX_DESKTOP_AURORA.md` | Linux desktop profiles, Aurora, availability, startup and recovery |
 | `docs/DESKTOP_API.md` | Jakarta REST, desktop selection and launch-plan contract |
+| `docs/BOOT_AND_DESKTOP_LOADING_PROGRESS.md` | Spitfire boot stages and rendering-neutral desktop loading progress |
+| `docs/BOOT_DESKTOP_PROGRESS_INTEGRATION.md` | Coordinated boot-to-desktop progress lifecycle and startup completion contract |
 | `docs/SOURCE_MIGRATION_MANIFEST.md` | Native-to-Java provenance and non-portable boundaries |
 | `docs/superpowers/specs/2026-09-09-linux-desktop-aurora-design.md` | Approved design record and implementation requirements |
 | `docs/superpowers/specs/2026-09-09-gnu-cross-platform-services-design.md` | GNU services and licensing design |
@@ -36,9 +38,15 @@ src/main/java/org/chimera/
 ├── koronos/      Kernel lifecycle, learning, concurrency and persistence
 ├── network/      Trusted-node identity, trust policy, signed messages and federation transport
 ├── runtime/      Linux runtime/service/security catalog and command planning
-└── desktop/      Linux desktop/session orchestration
+└── desktop/      Linux desktop/session orchestration and boot/loading progress
     └── freedesktop/ XDG and desktop-entry models
 ```
+
+## Startup progress coverage
+
+`SpitfireBootProgress` provides deterministic, rendering-neutral progress for the eight standard boot stages. `DesktopLoadingProgress` provides bounded 0–100% state and a 0–360° circular sweep suitable for a Windows-like loading indicator. `BootDesktopProgressCoordinator` joins the two phases: desktop progress cannot advance until Spitfire boot is complete, and startup is complete only after both phases reach 100%.
+
+The progress layer does not replace native firmware, GNOME, KDE Plasma, Xfce, Cinnamon, MATE, LXQt, Aurora, Wayland, X11, Windows, or macOS components. It supplies a shared state contract that terminal, serial, GTK/Qt, JavaFX or other front ends may render.
 
 ## Current compatibility coverage
 
@@ -48,7 +56,7 @@ The Library `W2K-ASM.txt` is integrated by architectural provenance metadata thr
 
 ## Open-source application coverage
 
-The new catalog targets mature applications including LibreOffice, GIMP, Inkscape, Blender, Krita, VLC, Audacity, OBS Studio, Thunderbird, KeePassXC, 7-Zip, Git, OpenSSH, Wireshark, QEMU, VirtualBox, Docker Engine, Podman, rclone, Syncthing, restic, FileZilla, PuTTY, curl, Wget, Kdenlive, Calibre, Okular, KDE Dolphin/Kate/Konsole, GNOME Files/System Monitor, libvirt, virt-manager, WireGuard and OpenVPN.
+The catalog targets mature applications including LibreOffice, GIMP, Inkscape, Blender, Krita, VLC, Audacity, OBS Studio, Thunderbird, KeePassXC, 7-Zip, Git, OpenSSH, Wireshark, QEMU, VirtualBox, Docker Engine, Podman, rclone, Syncthing, restic, FileZilla, PuTTY, curl, Wget, Kdenlive, Calibre, Okular, KDE Dolphin/Kate/Konsole, GNOME Files/System Monitor, libvirt, virt-manager, WireGuard and OpenVPN.
 
 These entries are integration metadata rather than bundled binaries. Linux distribution package managers and Windows installers/providers remain responsible for signatures, updates and host integration.
 

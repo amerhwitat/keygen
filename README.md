@@ -13,7 +13,32 @@ This repository is the **isolated Java implementation track** for Chimera II OS.
 - 128-dimensional state/tensor representation.
 - Recurrent learning prototype for the Koronos cognitive runtime.
 - REST/Jakarta EE boundary for kernel telemetry and inference.
+- Linux desktop runtime covering Fedora, Ubuntu, Debian and Aurora/Wayland profiles.
+- Freedesktop/XDG desktop-entry integration and structured startup launch plans.
 - Explicit provenance/migration ledger for native source files.
+
+## Linux desktop runtime
+
+The additive `org.chimera.desktop` layer provides a data-driven startup menu for:
+
+- Chimera Aurora / Wayland
+- Fedora GNOME
+- Ubuntu GNOME
+- Debian GNOME
+- KDE Plasma
+- Xfce
+- Cinnamon
+- MATE
+- LXQt
+- GNOME Flashback
+- Safe / Minimal
+- Headless / Server
+
+Profile definition and host availability are separate. The runtime detects Wayland/X11/session capabilities and prepares a structured `DesktopLaunchPlan`. Actual GNOME/KDE/Xfce/Cinnamon/MATE/LXQt sessions remain native Linux software; Java does not reimplement their compositors.
+
+Jakarta REST exposes `/api/desktop/profiles`, `/api/desktop/current`, and `/api/desktop/select/{id}`. The selection endpoint creates a launch plan and does not execute it.
+
+The desktop integration follows the freedesktop desktop-entry model used for interoperable application launch metadata. citeturn0search0
 
 ## Important scope
 

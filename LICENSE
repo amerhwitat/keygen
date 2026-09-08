@@ -1,0 +1,21 @@
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+
+This repository's original source code and documentation are licensed under
+the GNU General Public License, version 3 or (at your option) any later
+version (GPL-3.0-or-later).
+
+The complete, authoritative license text is published by the Free Software
+Foundation at:
+https://www.gnu.org/licenses/gpl-3.0.html
+
+A verbatim copy of the GPLv3 license document may be distributed with this
+repository. This file identifies the governing license; it is not intended
+to modify the license text.
+
+Important third-party notice:
+Third-party libraries, dependencies, operating-system components, GNU
+packages, Windows components, Apple components, and external binaries
+referenced or orchestrated by Chimera II are not automatically relicensed
+under this repository license. Their respective copyright and license terms
+continue to apply.

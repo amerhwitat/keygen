@@ -2,16 +2,18 @@
 
 This repository is the isolated Java implementation track for Chimera II OS. It provides a semantic JVM model of Chimera processor/kernel concepts, the Koronos 128D research runtime, persistent self-learning, Linux desktop orchestration, runtime/service integration, concurrency, trusted-node federation and cross-platform interoperability.
 
-## Source-code citation index
+## Complete source-code citation index
 
-- [Java/Koronos source tree](src/)
-- [Build configuration](pom.xml)
-- [Tests](src/test/)
-- [Apple SwiftUI/Xcode boundary](apple/)
-- [Centralized Apple Objective-C + Flutter companion](https://github.com/amerhwitat/general/tree/master/Apple-Implementations/keygen)
-- [Documentation](docs/)
+| Area | Source |
+|---|---|
+| Java/Koronos source | [src/](src/) |
+| Maven/build configuration | [pom.xml](pom.xml) |
+| Tests | [src/test/](src/test/) |
+| Apple SwiftUI/Xcode | [apple/](apple/) |
+| Documentation | [docs/](docs/) |
+| Complete tracked repository | [source tree](.) |
 
-The Java source is the reference implementation for this repository; cross-language integrations preserve the same semantic contracts and provenance metadata.
+These links are the README-level citations for the maintained code; source files under each implementation tree are the detailed source record.
 
 ## Centralized Apple Objective-C + Flutter
 

@@ -2,21 +2,17 @@
 
 This repository is the isolated Java implementation track for Chimera II OS. It provides a semantic JVM model of Chimera processor/kernel concepts, the Koronos 128D research runtime, persistent self-learning, Linux desktop orchestration, runtime/service integration, concurrency, trusted-node federation and cross-platform interoperability.
 
+## Centralized Apple Objective-C + Flutter
+
+The Apple companion is maintained in [`general/Apple-Implementations/keygen`](https://github.com/amerhwitat/general/tree/master/Apple-Implementations/keygen). It provides Objective-C/Xcode native integration and Flutter iOS/macOS UI while keeping Java/Koronos execution behind an explicit cross-language service boundary.
+
 ## Cross-language crypto integration
 
-The repository participates in the unified Chimera crypto solution:
-
-- `java/` — authoritative Java interoperability/application layer.
-- `cpp/` — native C++ interoperability layer.
-- `node/` — Node.js ESM integration layer.
-- existing Python research artifacts remain interoperable through deterministic JSON/JSONL contracts.
-- `apple/` — native SwiftUI/Xcode iOS/iPadOS and macOS application boundary.
-
-All implementations use public/synthetic vectors and shared provenance metadata. Wallet signing remains external and owner-controlled. Address-to-private-key recovery, seed guessing and unauthorized credential attacks are excluded.
+The repository participates in the unified Chimera crypto solution across Java, C++, Node.js, Python and Apple. All implementations use public/synthetic vectors and shared provenance metadata. Wallet signing remains external and owner-controlled. Address-to-private-key recovery, seed guessing and unauthorized credential attacks are excluded.
 
 ## Apple applications
 
-`apple/project.yml` is generated with XcodeGen into iOS and macOS application targets. The SwiftUI shell is intentionally separated from the Java runtime; cross-language state is exchanged through explicit deterministic contracts. IPA export requires macOS/Xcode and operator-controlled signing.
+`apple/project.yml` remains the native SwiftUI/Xcode boundary. IPA export requires macOS/Xcode and operator-controlled signing. Use XcodeGen to regenerate projects from source specifications.
 
 ## Existing Java/Koronos scope
 
@@ -26,14 +22,7 @@ All implementations use public/synthetic vectors and shared provenance metadata.
 - Deterministic Koronos 128D research runtime.
 - Persistent self-learning kernel using H2.
 - High-concurrency runtime and trusted Ed25519 node federation.
-- Linux/Windows/Unix/macOS/GNU compatibility catalogs and native-service integration boundaries.
 - C8192/R8192 semantic and conformance metadata.
-
-## Portfolio 128D + authenticated P2P
-
-This Java track implements the shared Chimera semantic and peer interoperability boundary. Koronos state, service state and trusted-node metadata can use geometry, time, observer/perspective, events, objects, properties and extensible cognition/vector dimensions. P2P is opt-in and validates peer identity, capabilities, sequencing/replay state, payload hashes and optional signatures.
-
-See `docs/CHIMERA_128D_P2P_PORTFOLIO.md` and the canonical protocol in `ChimeraIIOS/docs/CHIMERA_P2P_PROTOCOL.md`. The protocol excludes unsolicited scanning, credential/private-key exchange, arbitrary executable transfer and remote command execution.
 
 ## Build
 
@@ -42,6 +31,4 @@ mvn test
 mvn package
 ```
 
-For Apple builds on macOS: `brew install xcodegen`, `xcodegen generate --spec apple/project.yml`, then archive/export with Xcode. See `apple/README.md`.
-
-See `docs/CRYPTO_AI_INTEROPERABILITY.md` and the root documentation for the cross-language contract.
+For Apple builds on macOS: install Xcode/XcodeGen, generate `apple/project.yml`, then archive/export with Xcode.

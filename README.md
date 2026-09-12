@@ -2,6 +2,29 @@
 
 This repository is the isolated Java implementation track for Chimera II OS. It provides a semantic JVM model of Chimera processor/kernel concepts, the Koronos 128D research runtime, persistent self-learning, Linux desktop orchestration, runtime/service integration, concurrency, trusted-node federation and cross-platform interoperability.
 
+## Build and run
+
+Java/Maven:
+
+```bash
+mvn test
+mvn package
+```
+
+Repository-wide automation:
+
+```bat
+build-tools\build.bat --only java
+```
+
+or:
+
+```powershell
+.\build-tools\build.ps1 -Only java
+```
+
+The Java launcher detects Maven/Gradle/plain-Java layouts and prints dependency, compile, package and run stages.
+
 ## Cross-language crypto integration
 
 The repository participates in the unified Chimera crypto solution:
@@ -23,12 +46,5 @@ All implementations use public/synthetic vectors and shared provenance metadata.
 - High-concurrency runtime and trusted Ed25519 node federation.
 - Linux/Windows/Unix/macOS/GNU compatibility catalogs and native-service integration boundaries.
 - C8192/R8192 semantic and conformance metadata.
-
-## Build
-
-```bash
-mvn test
-mvn package
-```
 
 See `docs/CRYPTO_AI_INTEROPERABILITY.md` and the root documentation for the cross-language contract.

@@ -24,6 +24,12 @@ All implementations use public/synthetic vectors and shared provenance metadata.
 - Linux/Windows/Unix/macOS/GNU compatibility catalogs and native-service integration boundaries.
 - C8192/R8192 semantic and conformance metadata.
 
+## Portfolio 128D + authenticated P2P
+
+This Java track implements the shared Chimera semantic and peer interoperability boundary. Koronos state, service state and trusted-node metadata can use geometry, time, observer/perspective, events, objects, properties and extensible cognition/vector dimensions. P2P is opt-in and validates peer identity, capabilities, sequencing/replay state, payload hashes and optional signatures.
+
+See `docs/CHIMERA_128D_P2P_PORTFOLIO.md` and the canonical protocol in `ChimeraIIOS/docs/CHIMERA_P2P_PROTOCOL.md`. The protocol excludes unsolicited scanning, credential/private-key exchange, arbitrary executable transfer and remote command execution.
+
 ## Build
 
 ```bash

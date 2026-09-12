@@ -10,8 +10,13 @@ The repository participates in the unified Chimera crypto solution:
 - `cpp/` — native C++ interoperability layer.
 - `node/` — Node.js ESM integration layer.
 - existing Python research artifacts remain interoperable through deterministic JSON/JSONL contracts.
+- `apple/` — native SwiftUI/Xcode iOS/iPadOS and macOS application boundary.
 
 All implementations use public/synthetic vectors and shared provenance metadata. Wallet signing remains external and owner-controlled. Address-to-private-key recovery, seed guessing and unauthorized credential attacks are excluded.
+
+## Apple applications
+
+`apple/project.yml` is generated with XcodeGen into iOS and macOS application targets. The SwiftUI shell is intentionally separated from the Java runtime; cross-language state is exchanged through explicit deterministic contracts. IPA export requires macOS/Xcode and operator-controlled signing.
 
 ## Existing Java/Koronos scope
 
@@ -36,5 +41,7 @@ See `docs/CHIMERA_128D_P2P_PORTFOLIO.md` and the canonical protocol in `ChimeraI
 mvn test
 mvn package
 ```
+
+For Apple builds on macOS: `brew install xcodegen`, `xcodegen generate --spec apple/project.yml`, then archive/export with Xcode. See `apple/README.md`.
 
 See `docs/CRYPTO_AI_INTEROPERABILITY.md` and the root documentation for the cross-language contract.

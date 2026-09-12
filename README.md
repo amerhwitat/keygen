@@ -2,6 +2,17 @@
 
 This repository is the isolated Java implementation track for Chimera II OS. It provides a semantic JVM model of Chimera processor/kernel concepts, the Koronos 128D research runtime, persistent self-learning, Linux desktop orchestration, runtime/service integration, concurrency, trusted-node federation and cross-platform interoperability.
 
+## Source-code citation index
+
+- [Java/Koronos source tree](src/)
+- [Build configuration](pom.xml)
+- [Tests](src/test/)
+- [Apple SwiftUI/Xcode boundary](apple/)
+- [Centralized Apple Objective-C + Flutter companion](https://github.com/amerhwitat/general/tree/master/Apple-Implementations/keygen)
+- [Documentation](docs/)
+
+The Java source is the reference implementation for this repository; cross-language integrations preserve the same semantic contracts and provenance metadata.
+
 ## Centralized Apple Objective-C + Flutter
 
 The Apple companion is maintained in [`general/Apple-Implementations/keygen`](https://github.com/amerhwitat/general/tree/master/Apple-Implementations/keygen). It provides Objective-C/Xcode native integration and Flutter iOS/macOS UI while keeping Java/Koronos execution behind an explicit cross-language service boundary.
@@ -9,10 +20,6 @@ The Apple companion is maintained in [`general/Apple-Implementations/keygen`](ht
 ## Cross-language crypto integration
 
 The repository participates in the unified Chimera crypto solution across Java, C++, Node.js, Python and Apple. All implementations use public/synthetic vectors and shared provenance metadata. Wallet signing remains external and owner-controlled. Address-to-private-key recovery, seed guessing and unauthorized credential attacks are excluded.
-
-## Apple applications
-
-`apple/project.yml` remains the native SwiftUI/Xcode boundary. IPA export requires macOS/Xcode and operator-controlled signing. Use XcodeGen to regenerate projects from source specifications.
 
 ## Existing Java/Koronos scope
 

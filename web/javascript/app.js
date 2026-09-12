@@ -1,0 +1,1 @@
+const out=document.querySelector('#out');document.querySelector('#make').onclick=()=>{const bytes=crypto.getRandomValues(new Uint8Array(16));out.textContent=[...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');};

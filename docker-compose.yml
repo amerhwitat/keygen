@@ -1,0 +1,6 @@
+services:
+  app:
+    build: .
+    image: amerhwitat/keygen:local
+    container_name: keygen
+    init: true

@@ -1,0 +1,1 @@
+{"$schema":"CHM-APP-INTEGRATION-1","application":"keygen","target":"Chimera II OS","integration_points":["Aurora Crypto tools","Chimera cryptography API"],"purpose":"Expose local key-generation primitives through the Chimera capability boundary.","security":"Secrets remain local; no credential harvesting or unauthorized wallet access."}
